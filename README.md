@@ -4,35 +4,22 @@ Interactive presentation game teaching exploration vs exploitation through a net
 
 ## Setup
 
-### 1. Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of `setup.sql`
-3. Copy your project URL and anon key from **Settings > API**
-
-### 2. Environment Variables
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your Supabase credentials:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-### 3. Run Locally
+### 1. Install & Run
 
 ```bash
 npm install
-npm run dev
+npx convex dev    # sets up Convex backend (login if prompted)
+npm run dev        # in a second terminal
 ```
 
-### 4. Deploy to Vercel
+### 2. Deploy to Vercel
 
-Push to GitHub, then import into Vercel. Add the same env vars in Vercel project settings.
+```bash
+npx convex deploy              # deploy Convex to production
+vercel --prod                   # deploy frontend (add NEXT_PUBLIC_CONVEX_URL env var)
+```
+
+Set `NEXT_PUBLIC_CONVEX_URL` in Vercel to your Convex production URL (shown after `convex deploy`).
 
 ## Routes
 
@@ -51,9 +38,10 @@ Push to GitHub, then import into Vercel. Add the same env vars in Vercel project
 - Round 2: Epsilon-greedy hints shown
 - Round 3: Thompson sampling confidence bars shown
 - Presenter controls rounds from the dashboard
+- All data syncs in real-time via Convex
 
 ## Tech Stack
 
 - Next.js 16 + TypeScript + Tailwind CSS
-- Supabase (Realtime + Postgres)
+- Convex (real-time backend)
 - Deployed on Vercel

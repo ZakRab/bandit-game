@@ -1,40 +1,33 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import {
   CONNECTION_TYPES,
   ConnectionType,
   PERSONAS,
-  Persona,
   ATTEMPTS_PER_ROUND,
   ROUNDS_COUNT,
   DASHBOARD_CODE,
   getPersonaById,
 } from "@/lib/game-config";
 
-interface PlayerData {
-  id: string;
-  persona: string;
-}
-
-interface ChoiceData {
-  player_id: string;
-  round: number;
-  attempt: number;
-  choice: string;
-  success: boolean;
-}
-
 export default function DashboardPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [code, setCode] = useState("");
-  const [currentRound, setCurrentRound] = useState(0);
-  const [roundActive, setRoundActive] = useState(false);
-  const [players, setPlayers] = useState<PlayerData[]>([]);
-  const [choices, setChoices] = useState<ChoiceData[]>([]);
 
-  // Auth check
+  const gameState = useQuery(api.game.getState);
+  const players = useQuery(api.game.getPlayers) ?? [];
+  const allChoices = useQuery(api.game.getAllChoices) ?? [];
+
+  const setRound = useMutation(api.game.setRound);
+  const resetGameMut = useMutation(api.game.resetGame);
+
+  const currentRound = gameState?.currentRound ?? 0;
+  const roundActive = gameState?.roundActive ?? false;
+  const isReveal = currentRound > ROUNDS_COUNT;
+
   const handleAuth = () => {
     if (code === DASHBOARD_CODE) {
       setAuthenticated(true);
@@ -47,82 +40,6 @@ export default function DashboardPage() {
       setAuthenticated(true);
     }
   }, []);
-
-  // Load initial data and subscribe
-  useEffect(() => {
-    if (!authenticated) return;
-
-    // Load game state
-    supabase
-      .from("game_sessions")
-      .select("*")
-      .eq("id", "main")
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setCurrentRound(data.current_round);
-          setRoundActive(data.round_active);
-        }
-      });
-
-    // Load players
-    supabase
-      .from("players")
-      .select("*")
-      .then(({ data }) => {
-        if (data) setPlayers(data);
-      });
-
-    // Load choices
-    supabase
-      .from("choices")
-      .select("*")
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (data) setChoices(data);
-      });
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel("dashboard")
-      .on("postgres_changes", { event: "*", schema: "public", table: "game_sessions" }, (payload) => {
-        if (payload.eventType === "UPDATE") {
-          const data = payload.new as { current_round: number; round_active: boolean };
-          setCurrentRound(data.current_round);
-          setRoundActive(data.round_active);
-        }
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "players" }, (payload) => {
-        setPlayers((prev) => [...prev, payload.new as PlayerData]);
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "choices" }, (payload) => {
-        setChoices((prev) => [...prev, payload.new as ChoiceData]);
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [authenticated]);
-
-  const updateGameState = useCallback(async (round: number, active: boolean) => {
-    await supabase.from("game_sessions").update({ current_round: round, round_active: active }).eq("id", "main");
-  }, []);
-
-  const startRound = (round: number) => updateGameState(round, true);
-  const endRound = () => updateGameState(currentRound, false);
-  const showReveal = () => updateGameState(ROUNDS_COUNT + 1, false);
-
-  const resetGame = async () => {
-    if (!confirm("This will delete ALL player data and reset the game. Are you sure?")) return;
-    await supabase.from("choices").delete().neq("id", 0);
-    await supabase.from("players").delete().neq("id", "0");
-    await supabase.from("game_sessions").update({ current_round: 0, round_active: false }).eq("id", "main");
-    setPlayers([]);
-    setChoices([]);
-    setCurrentRound(0);
-    setRoundActive(false);
-  };
 
   if (!authenticated) {
     return (
@@ -148,8 +65,8 @@ export default function DashboardPage() {
     );
   }
 
-  // Compute stats
-  const roundChoices = (round: number) => choices.filter((c) => c.round === round);
+  // Computed stats
+  const roundChoices = (round: number) => allChoices.filter((c) => c.round === round);
   const currentRoundChoices = roundChoices(currentRound);
 
   const choiceDistribution = (round: number) => {
@@ -163,33 +80,41 @@ export default function DashboardPage() {
 
   const roundAvg = (round: number) => {
     const rc = roundChoices(round);
-    const playerIds = [...new Set(rc.map((c) => c.player_id))];
+    const playerIds = [...new Set(rc.map((c) => c.visitorId))];
     if (playerIds.length === 0) return 0;
     const total = playerIds.reduce((sum, pid) => {
-      return sum + rc.filter((c) => c.player_id === pid && c.success).length;
+      return sum + rc.filter((c) => c.visitorId === pid && c.success).length;
     }, 0);
     return total / playerIds.length;
   };
 
   const playersCompleted = () => {
-    const playerIds = [...new Set(currentRoundChoices.map((c) => c.player_id))];
-    return playerIds.filter((pid) => currentRoundChoices.filter((c) => c.player_id === pid).length >= ATTEMPTS_PER_ROUND).length;
+    const playerIds = [...new Set(currentRoundChoices.map((c) => c.visitorId))];
+    return playerIds.filter(
+      (pid) => currentRoundChoices.filter((c) => c.visitorId === pid).length >= ATTEMPTS_PER_ROUND
+    ).length;
   };
 
-  const isReveal = currentRound > ROUNDS_COUNT;
-
-  // Leaderboard
   const leaderboard = () => {
-    const playerIds = [...new Set(choices.map((c) => c.player_id))];
+    const playerIds = [...new Set(allChoices.map((c) => c.visitorId))];
     return playerIds
       .map((pid) => {
-        const pc = choices.filter((c) => c.player_id === pid);
+        const pc = allChoices.filter((c) => c.visitorId === pid);
         const successes = pc.filter((c) => c.success).length;
-        const player = players.find((p) => p.id === pid);
+        const player = players.find((p) => p.visitorId === pid);
         const persona = player ? getPersonaById(player.persona) : null;
         return { pid, persona, successes, total: pc.length };
       })
       .sort((a, b) => b.successes - a.successes);
+  };
+
+  const startRound = (round: number) => setRound({ currentRound: round, roundActive: true });
+  const endRound = () => setRound({ currentRound, roundActive: false });
+  const showReveal = () => setRound({ currentRound: ROUNDS_COUNT + 1, roundActive: false });
+
+  const resetGame = async () => {
+    if (!confirm("This will delete ALL player data and reset the game. Are you sure?")) return;
+    await resetGameMut();
   };
 
   return (
@@ -208,12 +133,19 @@ export default function DashboardPage() {
                 {currentRound === 0 ? "Lobby" : isReveal ? "Reveal" : `${currentRound}/${ROUNDS_COUNT}`}
               </span>
             </span>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${roundActive ? "bg-success/20 text-success" : "bg-muted/20 text-muted"}`}>
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-medium ${
+                roundActive ? "bg-success/20 text-success" : "bg-muted/20 text-muted"
+              }`}
+            >
               {roundActive ? "LIVE" : "PAUSED"}
             </span>
           </div>
         </div>
-        <button onClick={resetGame} className="px-4 py-2 bg-fail/20 text-fail rounded-lg text-sm hover:bg-fail/30 transition-colors">
+        <button
+          onClick={resetGame}
+          className="px-4 py-2 bg-fail/20 text-fail rounded-lg text-sm hover:bg-fail/30 transition-colors"
+        >
           Reset Game
         </button>
       </div>
@@ -223,12 +155,18 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold text-white mb-4">Round Controls</h2>
         <div className="flex flex-wrap gap-3">
           {currentRound === 0 && (
-            <button onClick={() => startRound(1)} className="px-6 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/80 text-lg">
+            <button
+              onClick={() => startRound(1)}
+              className="px-6 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/80 text-lg"
+            >
               Start Round 1
             </button>
           )}
           {currentRound >= 1 && currentRound <= ROUNDS_COUNT && roundActive && (
-            <button onClick={endRound} className="px-6 py-3 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 text-lg">
+            <button
+              onClick={endRound}
+              className="px-6 py-3 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 text-lg"
+            >
               End Round {currentRound}
             </button>
           )}
@@ -243,19 +181,22 @@ export default function DashboardPage() {
                 </button>
               )}
               {currentRound === ROUNDS_COUNT && (
-                <button onClick={showReveal} className="px-6 py-3 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-400 text-lg">
+                <button
+                  onClick={showReveal}
+                  className="px-6 py-3 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-400 text-lg"
+                >
                   Show Reveal
                 </button>
               )}
-              {/* Also allow restarting current round */}
-              <button onClick={() => startRound(currentRound)} className="px-6 py-3 bg-card-border text-white rounded-lg font-medium hover:bg-muted text-sm">
+              <button
+                onClick={() => startRound(currentRound)}
+                className="px-6 py-3 bg-card-border text-white rounded-lg font-medium hover:bg-muted text-sm"
+              >
                 Re-open Round {currentRound}
               </button>
             </>
           )}
-          {isReveal && (
-            <div className="text-muted text-lg flex items-center">Reveal mode active</div>
-          )}
+          {isReveal && <div className="text-muted text-lg flex items-center">Reveal mode active</div>}
         </div>
         <div className="mt-3 text-sm text-muted">
           {currentRound >= 1 && currentRound <= ROUNDS_COUNT && (
@@ -308,7 +249,9 @@ export default function DashboardPage() {
                         Round {r}
                         {r === 1 ? " (Gut)" : r === 2 ? " (Epsilon-Greedy)" : " (Thompson)"}
                       </span>
-                      <span className="text-sm font-mono text-white">{hasData ? avg.toFixed(1) : "-"} / {ATTEMPTS_PER_ROUND}</span>
+                      <span className="text-sm font-mono text-white">
+                        {hasData ? avg.toFixed(1) : "-"} / {ATTEMPTS_PER_ROUND}
+                      </span>
                     </div>
                     <div className="h-3 bg-card-border rounded-full overflow-hidden">
                       <div
@@ -337,13 +280,9 @@ export default function DashboardPage() {
                 const avg = roundAvg(r);
                 return (
                   <div key={r} className="bg-background rounded-lg p-4">
-                    <div className="text-xs text-muted mb-1">
-                      Round {r}
-                    </div>
+                    <div className="text-xs text-muted mb-1">Round {r}</div>
                     <div className="text-3xl font-bold text-white">{avg.toFixed(1)}</div>
-                    <div className="text-xs text-muted mt-1">
-                      / {ATTEMPTS_PER_ROUND}
-                    </div>
+                    <div className="text-xs text-muted mt-1">/ {ATTEMPTS_PER_ROUND}</div>
                     <div className="text-xs mt-2 text-muted">
                       {r === 1 ? "No strategy" : r === 2 ? "Epsilon-Greedy" : "Thompson Sampling"}
                     </div>
@@ -379,7 +318,9 @@ export default function DashboardPage() {
                         return (
                           <td
                             key={t.id}
-                            className={`text-center py-2 px-2 font-mono ${isBest ? "text-success font-bold" : "text-muted"}`}
+                            className={`text-center py-2 px-2 font-mono ${
+                              isBest ? "text-success font-bold" : "text-muted"
+                            }`}
                           >
                             {Math.round(rate * 100)}%
                           </td>
@@ -397,31 +338,32 @@ export default function DashboardPage() {
           <div className="bg-card border border-card-border rounded-xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Leaderboard</h3>
             <div className="space-y-2">
-              {leaderboard().slice(0, 10).map((entry, i) => (
-                <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
-                  <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
-                  <div className="flex-1">
-                    <span className="text-white text-sm">
-                      {entry.persona?.name || "Unknown"} ({entry.persona?.major})
+              {leaderboard()
+                .slice(0, 10)
+                .map((entry, i) => (
+                  <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
+                    <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
+                    <div className="flex-1">
+                      <span className="text-white text-sm">
+                        {entry.persona?.name || "Unknown"} ({entry.persona?.major})
+                      </span>
+                    </div>
+                    <span className="text-lg font-bold text-accent">
+                      {entry.successes}/{entry.total}
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-accent">
-                    {entry.successes}/{entry.total}
-                  </span>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 
           {/* Regret Visualization */}
           <div className="bg-card border border-card-border rounded-xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Regret Curves (Theoretical)</h3>
-            <div className="relative h-48 border-l-2 border-b-2 border-card-border">
-              {/* Y axis label */}
-              <div className="absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-muted">Cumulative Regret</div>
-              {/* X axis label */}
+            <div className="relative h-48 border-l-2 border-b-2 border-card-border ml-4">
+              <div className="absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-muted whitespace-nowrap">
+                Cumulative Regret
+              </div>
               <div className="absolute bottom-[-24px] left-1/2 -translate-x-1/2 text-xs text-muted">Attempts</div>
-              {/* Random - linear */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <path d="M 0 100 L 100 10" stroke="#EF4444" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
                 <path d="M 0 100 Q 50 50 100 30" stroke="#3B82F6" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />

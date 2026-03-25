@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import {
   CONNECTION_TYPES,
   ConnectionType,
@@ -14,7 +15,7 @@ import {
 } from "@/lib/game-config";
 import { v4 as uuidv4 } from "uuid";
 
-interface Choice {
+interface ChoiceLocal {
   round: number;
   attempt: number;
   choice: ConnectionType;
@@ -26,7 +27,7 @@ interface Stats {
   successes: number;
 }
 
-function getStats(choices: Choice[]): Record<ConnectionType, Stats> {
+function getStats(choices: ChoiceLocal[]): Record<ConnectionType, Stats> {
   const stats: Record<ConnectionType, Stats> = {
     major: { attempts: 0, successes: 0 },
     adjacent: { attempts: 0, successes: 0 },
@@ -65,14 +66,28 @@ function getConfidence(s: Stats): { level: "unknown" | "low" | "medium" | "high"
 }
 
 export default function PlayerPage() {
-  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [visitorId, setVisitorId] = useState<string>("");
   const [persona, setPersona] = useState<Persona | null>(null);
-  const [currentRound, setCurrentRound] = useState(0);
-  const [roundActive, setRoundActive] = useState(false);
-  const [choices, setChoices] = useState<Choice[]>([]);
   const [lastResult, setLastResult] = useState<{ success: boolean; type: ConnectionType } | null>(null);
-  const [connected, setConnected] = useState(false);
   const resultTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Convex queries (auto-reactive)
+  const gameState = useQuery(api.game.getState);
+  const myChoicesRaw = useQuery(api.game.getMyChoices, visitorId ? { visitorId } : "skip");
+
+  // Convex mutations
+  const joinGame = useMutation(api.game.joinGame);
+  const recordChoice = useMutation(api.game.makeChoice);
+
+  const currentRound = gameState?.currentRound ?? 0;
+  const roundActive = gameState?.roundActive ?? false;
+
+  const choices: ChoiceLocal[] = (myChoicesRaw ?? []).map((c) => ({
+    round: c.round,
+    attempt: c.attempt,
+    choice: c.choice as ConnectionType,
+    success: c.success,
+  }));
 
   const roundChoices = choices.filter((c) => c.round === currentRound);
   const currentAttempt = roundChoices.length;
@@ -96,96 +111,34 @@ export default function PlayerPage() {
       localStorage.setItem("bandit_persona_id", personaId);
     }
 
-    setPlayerId(id);
+    setVisitorId(id);
     setPersona(getPersonaById(personaId) || PERSONAS[0]);
-
-    // Register player in Supabase
-    supabase
-      .from("players")
-      .upsert({ id, persona: personaId }, { onConflict: "id" })
-      .then();
-
-    // Load existing choices
-    supabase
-      .from("choices")
-      .select("*")
-      .eq("player_id", id)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (data) {
-          setChoices(
-            data.map((d: { round: number; attempt: number; choice: string; success: boolean }) => ({
-              round: d.round,
-              attempt: d.attempt,
-              choice: d.choice as ConnectionType,
-              success: d.success,
-            }))
-          );
-        }
-      });
-  }, []);
-
-  // Subscribe to game state
-  useEffect(() => {
-    supabase
-      .from("game_sessions")
-      .select("*")
-      .eq("id", "main")
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setCurrentRound(data.current_round);
-          setRoundActive(data.round_active);
-          setConnected(true);
-        }
-      });
-
-    const channel = supabase
-      .channel("game-state")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "game_sessions", filter: "id=eq.main" },
-        (payload) => {
-          const data = payload.new as { current_round: number; round_active: boolean };
-          setCurrentRound(data.current_round);
-          setRoundActive(data.round_active);
-        }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") setConnected(true);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    joinGame({ visitorId: id, persona: personaId });
+  }, [joinGame]);
 
   const makeChoice = useCallback(
     async (type: ConnectionType) => {
-      if (!canPlay || !playerId || !persona) return;
+      if (!canPlay || !visitorId || !persona) return;
 
       const success = rollSuccess(persona.rates[type]);
       const attempt = currentAttempt + 1;
-
-      const newChoice: Choice = { round: currentRound, attempt, choice: type, success };
-      setChoices((prev) => [...prev, newChoice]);
 
       setLastResult({ success, type });
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
       resultTimeout.current = setTimeout(() => setLastResult(null), 1500);
 
-      await supabase.from("choices").insert({
-        player_id: playerId,
+      await recordChoice({
+        visitorId,
         round: currentRound,
         attempt,
         choice: type,
         success,
       });
     },
-    [canPlay, playerId, persona, currentAttempt, currentRound]
+    [canPlay, visitorId, persona, currentAttempt, currentRound, recordChoice]
   );
 
-  if (!persona || !playerId) {
+  if (!persona || !visitorId) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-muted text-lg">Loading...</div>
@@ -201,8 +154,8 @@ export default function PlayerPage() {
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-white">Network Builder</h1>
         <div className="flex items-center justify-center gap-2 mt-1">
-          <span className={`w-2 h-2 rounded-full ${connected ? "bg-success" : "bg-fail"}`} />
-          <span className="text-sm text-muted">{connected ? "Connected" : "Connecting..."}</span>
+          <span className={`w-2 h-2 rounded-full ${gameState ? "bg-success" : "bg-fail"}`} />
+          <span className="text-sm text-muted">{gameState ? "Connected" : "Connecting..."}</span>
         </div>
       </div>
 
