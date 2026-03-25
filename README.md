@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Multi-Armed Bandits: Network Builder Game
 
-## Getting Started
+Interactive presentation game teaching exploration vs exploitation through a networking simulation.
 
-First, run the development server:
+## Setup
+
+### 1. Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `setup.sql`
+3. Copy your project URL and anon key from **Settings > API**
+
+### 2. Environment Variables
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edit `.env.local` with your Supabase credentials:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Run Locally
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Push to GitHub, then import into Vercel. Add the same env vars in Vercel project settings.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Routes
 
-## Deploy on Vercel
+| Route | Purpose |
+|-------|---------|
+| `/` | Player game (mobile-first) |
+| `/dashboard` | Presenter dashboard (code: `bandit2026`) |
+| `/qr` | QR code slide (white bg, for projecting) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How It Works
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Players scan QR code and get assigned a random persona
+- Each persona has hidden success rates for 4 connection types
+- 3 rounds of 4 attempts each
+- Round 1: No strategy (gut feeling)
+- Round 2: Epsilon-greedy hints shown
+- Round 3: Thompson sampling confidence bars shown
+- Presenter controls rounds from the dashboard
+
+## Tech Stack
+
+- Next.js 16 + TypeScript + Tailwind CSS
+- Supabase (Realtime + Postgres)
+- Deployed on Vercel
