@@ -98,22 +98,27 @@ export default function PlayerPage() {
 
   // Initialize player
   useEffect(() => {
-    let id = localStorage.getItem("bandit_player_id");
-    let personaId = localStorage.getItem("bandit_persona_id");
+    let id = sessionStorage.getItem("bandit_player_id");
 
     if (!id) {
       id = uuidv4();
-      localStorage.setItem("bandit_player_id", id);
-    }
-    if (!personaId) {
-      const p = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
-      personaId = p.id;
-      localStorage.setItem("bandit_persona_id", personaId);
+      sessionStorage.setItem("bandit_player_id", id);
     }
 
     setVisitorId(id);
-    setPersona(getPersonaById(personaId) || PERSONAS[0]);
-    joinGame({ visitorId: id, persona: personaId });
+
+    // Server assigns persona (balanced across players)
+    const cachedPersona = sessionStorage.getItem("bandit_persona_id");
+    if (cachedPersona) {
+      setPersona(getPersonaById(cachedPersona) || PERSONAS[0]);
+    }
+
+    joinGame({ visitorId: id }).then((assignedPersona) => {
+      if (assignedPersona) {
+        sessionStorage.setItem("bandit_persona_id", assignedPersona);
+        setPersona(getPersonaById(assignedPersona) || PERSONAS[0]);
+      }
+    });
   }, [joinGame]);
 
   const makeChoice = useCallback(

@@ -1,0 +1,260 @@
+MULTI-ARMED BANDITS
+Optimal Decision-Making Under Uncertainty
+Lance  |  Wilson  |  Zak  |  Tatum  |  Kenny
+March 26, 2026
+WILSON — 0:00-1:00• Welcome everyone, introduce the team• Today's topic: making optimal decisions when you don't know which option is best• Real-world stakes: Google A/B tests, clinical trials, investment strategy• Tease the interactive game — they'll be playing on their phones• Set energy: this is a workshop, not a lecture — participation matters
+1
+
+THE EXPLORATION-EXPLOITATION DILEMMA
+You have multiple options. Each has an unknown success rate.
+You have 
+limited attempts. What do you do?
+EXPLOIT
+Pick what's worked so far
+EXPLORE
+Try something new
+MIX STRATEGICALLY
+Balance both intelligently
+WILSON — 1:00-2:30• Frame the core dilemma: exploit vs explore vs mix• Give everyday examples: picking restaurants, choosing jobs, dating• Business examples: which website design converts better? which ad to show?• Medical: which treatment saves more lives — do you keep testing or commit?• Key point: today we solve this for student networking, but these principles are universal• Ask audience: 'Who's ever stuck with a restaurant they know instead of trying somewhere new?' — that's exploitation• Pause on each card — let them absorb the three options
+2
+
+PULL OUT YOUR PHONES
+[ INSERT QR CODE ]
+bandit-game.vercel.app/play
+WILSON — 2:30-4:00• 'Pull out your phones and scan this'• Read the URL out loud as backup for anyone who can't scan• Wait 60-90 seconds — don't rush this, let everyone get loaded in• Walk around and help anyone having trouble connecting• Confirm people are seeing their assigned persona on screen• 'Don't share your persona with anyone yet — that matters later'
+3
+
+HOW THE GAME WORKS
+You're a student building your professional network
+4 types of connections available to explore
+Each has a HIDDEN response rate you must discover
+3 rounds, 4 attempts per round = 12 total tries
+Goal: Maximize successful connections
+LANCE — 4:00-5:00• Explain the scenario: you're a student trying to build your professional network• 4 types of connections — each has a HIDDEN response rate unique to your persona• 3 rounds, 4 attempts each = 12 total tries to maximize connections• Emphasize: the rates are different for different people — what works for you might not work for someone else• 'Your phone assigned you a persona with a specific major and goal — keep it secret'• Connect to real life: this is like deciding which networking events to attend or which LinkedIn messages to send
+4
+
+THE 4 CONNECTION TYPES
+YOUR MAJOR
+Students in your field
+ADJACENT FIELDS
+Related but different majors
+DIFFERENT COLLEGES
+Completely different areas
+ALUMNI / PROS
+People who've graduated
+Which is best? You'll have to discover through exploration!
+LANCE — 5:00-5:30• Walk through each of the 4 connection types briefly• Your Major: people in your exact field — feels safe and familiar• Adjacent Fields: related but different — some overlap• Different Colleges: totally different area — high risk, maybe high reward• Alumni/Pros: people who've already graduated — industry connections• 'Which is best? That's the whole point — you don't know yet'• Transition to Round 1: 'No strategy yet, just go with your gut — pick whatever feels right'
+5
+
+ROUND 1 — PLAY NOW
+No strategy — go with your gut!
+4 attempts  •  Pick whatever feels right
+ZAK — 5:30-8:30 (3 min gameplay)• Switch to the live game dashboard on the projector• Narrate what you see live:  - 'Looks like most people going with Your Major — safe choice'  - 'A few brave souls trying Different Colleges'  - Call out any interesting patterns in the data• Keep energy up — react to successes and failures• After all 4 attempts: read the class average out loud from dashboard• 'Okay, not bad — but what if I told you there's a strategy that could do better?'• Switch back to slides
+6
+
+STRATEGY 1: EPSILON-GREEDY
+80%
+EXPLOIT best option so far
+20%
+EXPLORE randomly
+WHY IT WORKS
+Mostly exploits what works
+Keeps exploring for better options
+Guaranteed not to get stuck on a bad choice
+TATUM — 8:30-10:00• Introduce Epsilon-Greedy as the first real strategy• The rule is simple: 80% of the time pick your best option, 20% try something random• Why 80/20? You mostly do what works, but you never stop learning• 'Look at your phone — it shows YOUR results from Round 1'• Ask: 'Which connection type had the highest success rate for you?'• That's your 'best so far' — you'll pick it most of the time• Key benefit: guaranteed you won't get stuck on a bad option forever• Real world: Amazon uses this to decide which ads to show you right now
+7
+
+EPSILON-GREEDY: EXAMPLE
+YOUR ROUND 1 RESULTS
+Connection Type
+Tries
+Success
+Rate
+Your Major
+2
+1
+50%
+Adjacent Fields
+1
+0
+0%
+Different Colleges
+1
+1
+100%
+Alumni/Pros
+0
+0
+—
+FOR ROUND 2:
+Best so far: Different Colleges (100%)
+
+3-4 attempts 
+→ Pick Different (exploit)
+
+0-1 attempts 
+→ Try something random (explore)
+TATUM — 10:00-10:30• Walk through the concrete example on screen• 'Say you tried Different Colleges once and it worked — that's 100%, your best'• 'For Round 2: pick Different 3 out of 4 times (exploit), try something random once (explore)'• Emphasize: everyone's 'best' will be different based on Round 1 results• Ask: 'What if you tied? Pick either one — doesn't matter, you'll learn more this round'• 'The random exploration is key — you might stumble onto something even better'
+8
+
+EPSILON-GREEDY: THE CODE
+success_rate = {}
+for each connection_type:
+    success_rate[type] = successes / attempts
+
+if random() < 0.2:         # explore
+    choice = random_choice()
+else:                      # exploit
+    choice = max(success_rate)
+
+pull(choice)
+update_stats(choice, outcome)
+O(k)
+per decision
+PRODUCTION
+Amazon, Facebook
+Round 2: Apply Epsilon-Greedy — START!
+TATUM — 10:30-11:00• Show the pseudocode — don't read it line by line, just explain the flow• 'Calculate success rate for each type, then flip a coin basically'• 20% chance → random pick, 80% chance → pick the best• O(k) per decision — super fast, k is just the number of options (4 for us)• Used in production at Amazon and Facebook — this is real, not just theory• Transition: 'Alright, let's see if this actually helps — Round 2, apply epsilon-greedy, GO'• Hand off to Zak for gameplay
+9
+
+ROUND 2 — PLAY NOW
+Apply Epsilon-Greedy!
+80% exploit your best option  •  20% explore randomly
+ZAK — 11:00-14:00 (3 min gameplay)• Switch to live game dashboard• Compare to Round 1 as people play:  - 'Seeing more concentrated choices now — people exploiting their best'  - 'But still some random exploration happening — good!'  - Note if the choice distribution shifted from Round 1• After all 4 attempts: announce Round 2 average• Compare to Round 1: 'We went from X to Y — strategy is working!'• Tease: 'But epsilon-greedy has a flaw... there's a smarter approach'• Switch back to slides
+10
+
+THE PROBLEM WITH EPSILON-GREEDY
+It treats all unknowns equally!
+Alumni: 5 tries → 1 success (20%)
+HIGH CONFIDENCE
+You know it's probably bad
+Different: 1 try → 1 success (100%)
+HIGH UNCERTAINTY
+Could be great, could be luck!
+Thompson's Insight:  Be optimistic about uncertainty
+KENNY — 14:00-15:00• 'Epsilon-greedy has a problem — it treats all unknowns the same'• Walk through the two cards:  - Alumni: tried 5 times, 1 success → you're pretty confident it's ~20%. Not great.  - Different: tried 1 time, 1 success → 100% rate, but that could be total luck!• The key question: should you explore 'Different' more? YES — you're uncertain about it• But epsilon-greedy doesn't care about uncertainty — it just picks randomly 20% of the time• Thompson's insight: BE OPTIMISTIC ABOUT UNCERTAINTY• If you're unsure about something, give it a chance — it might be gold• This is the intuition behind Thompson Sampling
+11
+
+THOMPSON SAMPLING: BAYESIAN APPROACH
+Model each option as Beta(successes + 1, failures + 1)
+THE ALGORITHM:  Sample from each distribution → Pick the highest sample
+KENNY — 15:00-16:00• 'We model each option as a probability distribution using the Beta distribution'• Don't get bogged down in math — focus on the intuition:  - More data → narrower distribution → more confident  - Less data → wider distribution → more uncertain• Alumni example: tried 5 times, narrow curve, you KNOW it's around 20%• Different example: tried once, wide curve — could be anywhere from 10% to 90%!• The algorithm: take a random sample from each distribution, pick the highest• Why this works: uncertain options sometimes sample HIGH, so you naturally explore them• Confident good options stay high, so you naturally exploit them• 'The math automatically balances explore vs exploit for you'
+12
+
+THOMPSON SAMPLING: THE CODE
+for each connection_type:
+    α = successes + 1
+    β = failures + 1
+    θ ~ Beta(α, β)   # Sample
+
+choice = argmax(θ)    # Pick highest
+O(k)
+per decision
+O(log T)
+regret — provably optimal!
+USED AT
+Netflix, Google, FDA
+Round 3: Apply Thompson Sampling — START!
+KENNY — 16:00-16:30• Walk through the pseudocode quickly — it's actually simpler than epsilon-greedy• Alpha = successes + 1, Beta = failures + 1, sample from Beta distribution• Pick whichever sampled highest — that's it• Key stats to emphasize:  - O(k) per decision — same speed as epsilon-greedy  - O(log T) regret — PROVABLY near-optimal, way better than epsilon-greedy• Name-drop where it's used: Netflix recommendations, Google experiments, actual FDA clinical trials• 'For Round 3 — think about what you're UNCERTAIN about, not just what worked'• 'If you barely tried something and it worked, try it again — you might have found gold'• Hand off to Zak for final round
+13
+
+ROUND 3 — PLAY NOW
+Apply Thompson Sampling!
+Be optimistic about uncertainty  •  Explore what you're unsure about
+ZAK — 16:30-19:30 (3 min gameplay)• Switch to live game dashboard for the final round• Commentary ideas:  - 'People are making more deliberate choices now'  - 'Notice how the distribution is shifting compared to Rounds 1 and 2'  - Call out if anyone is crushing it — build some friendly competition• After all 4 attempts: announce Round 3 average• Give the full progression: 'Round 1: X, Round 2: Y, Round 3: Z — the strategies worked!'• If scores improved: 'See? Better algorithms = better outcomes'• If scores didn't improve much: 'Remember, 4 attempts per round is very few — with more data Thompson really shines'• Tease the reveal: 'But could you have done even better? Let's find out what was actually going on behind the scenes...'• Switch back to slides
+14
+
+THE REVEAL: HIDDEN SUCCESS RATES
+Maya
+Data Science
+Science/Med 65%
+Biz 60% | Major 30% | Alumni 25%
+Jordan
+CS Student
+Alumni 70%
+Upper 55% | Industry 40% | Peers 35%
+Riley
+Business Analytics
+Liberal Arts 65%
+CS/Eng 60% | Biz 40% | Clubs 30%
+Sam
+Mech Engineering
+Alumni 65%
+Adjacent 45% | Major 35% | Diff 30%
+Alex
+CS + Design
+Adjacent 60%
+Diff 50% | Alumni 40% | Major 30%
+Taylor
+Business + Community
+Alumni 70%
+Diff 65% | Adjacent 55% | Major 35%
+WILSON — 19:30-21:00• This is the big reveal moment — build it up• Walk through 2-3 personas in detail:  - Maya (Data Science): 'Most of you Mayas probably stuck with your major at 30%, but Science/Med students were at 65%!'  - Jordan (CS): 'Alumni connections were 70% — twice as good as CS peers at 35%'  - Riley (Business): 'Liberal Arts students at 65% — diverse thinking wins for case comp teams'• Key surprise: the 'obvious' choice (your own major) was almost NEVER the best• Ask: 'How many of you found the optimal connection type?' — celebrate anyone who did• 'The people who explored early had a huge advantage'• Point out: weak ties and cross-disciplinary connections consistently outperformed
+15
+
+THE KEY INSIGHT
+There's no universal "best" strategy — it depends on YOUR context.
+CAREER GOALS
+Alumni & weak ties work best
+PROJECTS
+Complementary skills beat similarity
+RESEARCH
+Vertical connections — grad students, faculty
+COMMUNITY
+Bridging connections across groups
+MAB helps you efficiently learn YOUR optimal strategy — that's why LinkedIn's algorithm is personalized.
+WILSON — 21:00-22:00• 'There was no single best strategy — it depended entirely on your context'• Walk through each context row:  - Career goals: alumni and weak ties consistently beat peers  - Projects: you need complementary skills, not copies of yourself  - Research: vertical connections (grad students, professors) are gold  - Community work: bridging connections across different groups• The meta-lesson: MAB doesn't find THE answer — it efficiently finds YOUR answer• Connect to tech: 'This is exactly why LinkedIn's algorithm is personalized — it's running a bandit on your specific context'• 'Netflix doesn't show everyone the same thumbnails — it's learning what works for YOU'
+16
+
+REGRET ANALYSIS
+Regret = gap between optimal outcome and what you actually got
+Random
+O(T)
+Linear — keeps making mistakes
+Epsilon-Greedy
+O(T^{2/3})
+Sublinear — good
+Thompson
+O(log T)
+Logarithmic — optimal!
+WILSON — 22:00-22:30• Define regret simply: 'The gap between the best you COULD have done and what you actually got'• Walk through the three curves:  - Random: linear — you keep making mistakes at the same rate forever  - Epsilon-Greedy: sublinear — gets better over time but never fully optimal  - Thompson: logarithmic — flattens out fast, barely any regret after a while• 'Thompson is provably near-optimal — you literally can't do much better than O(log T)'• If you have class data: 'Your class average regret was about X per round — optimal would have been around Y'• This is why Thompson is the industry standard for production systems• Key takeaway: smarter exploration = less regret = better outcomes faster
+17
+
+REAL-WORLD APPLICATIONS
+Clinical Trials
+FDA-approved adaptive treatment allocation
+A/B Testing
+Google, Facebook, Amazon feature testing
+Online Advertising
+Meta ads platform — which ad creative to show
+Resource Allocation
+Portfolio optimization & budget decisions
+Recommendations
+Netflix, TikTok, YouTube — what to show next
+Network Routing
+AWS load balancing — which server path
+LANCE — 22:30-23:30• This slide shows MAB is everywhere — not just a classroom exercise• Hit each application briefly:  - Clinical trials: FDA now approves adaptive trials that allocate more patients to the winning treatment in real time  - A/B testing: Google tests thousands of variations simultaneously using bandits  - Ads: Meta's ad platform decides which creative to show you — that's a bandit  - Resource allocation: where to invest limited budget across competing projects  - Recommendations: Netflix, TikTok, YouTube — the 'For You' page is a bandit  - Network routing: AWS load balancers decide which server path is fastest• Key point: ANY repeated decision under uncertainty with limited resources = MAB• 'You'll encounter this framework everywhere in industry, not just in this class'
+18
+
+WHY THIS MATTERS
+Real-world optimization has:
+Unknown parameters — you don't know rates upfront
+Limited resources — can't try everything infinitely
+Changing conditions — preferences drift over time
+Cost of exploration — every failed attempt has a cost
+MAB FRAMEWORK
+A principled way to balance learning vs. earning
+THOMPSON SAMPLING
+O(log T) regret
+Provably near-optimal
+Works in practice
+LANCE — 23:30-24:00• Zoom out to the bigger picture — why does this matter beyond today?• Most real-world optimization has these 4 properties:  - Unknown parameters: you don't know success rates upfront  - Limited resources: can't try everything forever  - Changing conditions: what works today might not work tomorrow  - Cost of exploration: every failed attempt costs something (time, money, a patient's health)• MAB gives you a PRINCIPLED framework for balancing learning vs earning• Thompson Sampling specifically: O(log T) regret, provably near-optimal, works in practice• Connect to your own project: 'We're building a networking platform and this is exactly the problem we're solving'• 'Any exploration-exploitation tradeoff you face in your career — choosing jobs, investing, trying new tools — you can think about it through this lens'
+19
+
+QUESTIONS?
+When is exploration unethical?
+What if probabilities change over time?
+Where else do you see explore-exploit tradeoffs?
+Lance  |  Wilson  |  Zak  |  Tatum  |  Kenny
+ALL — 24:00-25:00+ (Q&A buffer)• Open the floor — 'Any questions about the algorithms, the game, or how this applies?'• If no questions, use the discussion prompts on screen:  - Ethics: 'When is exploration unethical? Think clinical trials — at what point do you STOP giving patients the worse treatment?'  - Non-stationary: 'What if probabilities change over time? User preferences drift — Netflix has to keep re-learning'  - Other tradeoffs: 'Where else do you see explore-exploit? Restaurants, career moves, relationships, investments...'• Be ready to discuss extensions if asked:  - Contextual bandits: using extra info (demographics, time of day) to personalize further  - Non-stationary bandits: adding a decay/forgetting factor  - Multi-objective bandits: optimizing for multiple things at once• Wrap up: thank the audience, remind them of the key takeaway — smart exploration beats blind guessing every time
+20

@@ -25,16 +25,29 @@ export const setRound = mutation({
 
 // ── Players ─────────────────────────────────────────────────
 
+const PERSONA_IDS = ["maya", "jordan", "riley", "sam", "alex", "taylor"];
+
 export const joinGame = mutation({
-  args: { visitorId: v.string(), persona: v.string() },
+  args: { visitorId: v.string() },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("players")
       .withIndex("by_visitor", (q) => q.eq("visitorId", args.visitorId))
       .first();
-    if (!existing) {
-      await ctx.db.insert("players", args);
-    }
+    if (existing) return existing.persona;
+
+    // Count players per persona and assign the least-used one
+    const allPlayers = await ctx.db.query("players").collect();
+    const counts: Record<string, number> = {};
+    for (const id of PERSONA_IDS) counts[id] = 0;
+    for (const p of allPlayers) counts[p.persona] = (counts[p.persona] || 0) + 1;
+
+    const minCount = Math.min(...Object.values(counts));
+    const leastUsed = PERSONA_IDS.filter((id) => counts[id] === minCount);
+    const persona = leastUsed[Math.floor(Math.random() * leastUsed.length)];
+
+    await ctx.db.insert("players", { visitorId: args.visitorId, persona });
+    return persona;
   },
 });
 
