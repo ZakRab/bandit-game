@@ -8,7 +8,7 @@ export default defineSchema({
   }),
   players: defineTable({
     visitorId: v.string(),
-    name: v.string(),
+    name: v.optional(v.string()),
     persona: v.string(),
   }).index("by_visitor", ["visitorId"]),
   choices: defineTable({

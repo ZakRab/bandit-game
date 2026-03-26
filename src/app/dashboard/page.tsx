@@ -97,39 +97,22 @@ export default function DashboardPage() {
 
   const ROUND_LABELS = ["", "Gut Feeling", "Epsilon-Greedy", "Thompson Sampling"];
 
-  const leaderboard = () => {
-    const playerIds = [...new Set(allChoices.map((c) => c.visitorId))];
+  const leaderboard = (round: number) => {
+    const rc = allChoices.filter((c) => c.round === round);
+    const playerIds = [...new Set(rc.map((c) => c.visitorId))];
     return playerIds
       .map((pid) => {
-        const pc = allChoices.filter((c) => c.visitorId === pid);
+        const pc = rc.filter((c) => c.visitorId === pid);
         const player = players.find((p) => p.visitorId === pid);
-        const persona = player ? getPersonaById(player.persona) : null;
-        const totalSuccesses = pc.filter((c) => c.success).length;
-
-        // Find best round
-        let bestRound = 0;
-        let bestScore = -1;
-        for (let r = 1; r <= ROUNDS_COUNT; r++) {
-          const rc = pc.filter((c) => c.round === r);
-          const score = rc.filter((c) => c.success).length;
-          if (score > bestScore) {
-            bestScore = score;
-            bestRound = r;
-          }
-        }
-
         return {
           pid,
           name: player?.name || "Unknown",
-          persona,
-          totalSuccesses,
+          persona: player ? getPersonaById(player.persona) : null,
+          successes: pc.filter((c) => c.success).length,
           total: pc.length,
-          bestScore,
-          bestRound,
-          bestAlgo: ROUND_LABELS[bestRound] || "",
         };
       })
-      .sort((a, b) => b.totalSuccesses - a.totalSuccesses);
+      .sort((a, b) => b.successes - a.successes);
   };
 
   const startRound = (round: number) => setRound({ currentRound: round, roundActive: true });
@@ -392,33 +375,34 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Leaderboard */}
-          <div className="bg-card border border-card-border rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Leaderboard</h3>
-            <div className="space-y-2">
-              {leaderboard().map((entry, i) => (
-                <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
-                  <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white text-sm font-medium truncate">{entry.name}</div>
-                    <div className="text-xs text-muted">
-                      {entry.persona?.name} ({entry.persona?.major})
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-lg font-bold text-accent">
-                      {entry.totalSuccesses}/{entry.total}
-                    </div>
-                    {entry.bestRound > 0 && (
-                      <div className="text-xs text-muted">
-                        Best: {entry.bestScore}/{ATTEMPTS_PER_ROUND} ({entry.bestAlgo})
+          {/* Leaderboards by Round */}
+          {[1, 2, 3].map((r) => {
+            const entries = leaderboard(r);
+            if (entries.length === 0) return null;
+            return (
+              <div key={r} className="bg-card border border-card-border rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Round {r}: {ROUND_LABELS[r]}
+                </h3>
+                <div className="space-y-2">
+                  {entries.map((entry, i) => (
+                    <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
+                      <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-white text-sm font-medium truncate">{entry.name}</div>
+                        <div className="text-xs text-muted">
+                          {entry.persona?.name} ({entry.persona?.major})
+                        </div>
                       </div>
-                    )}
-                  </div>
+                      <span className="text-lg font-bold text-accent shrink-0">
+                        {entry.successes}/{ATTEMPTS_PER_ROUND}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
 
           {/* Regret Visualization */}
           <div className="bg-card border border-card-border rounded-xl p-6">
