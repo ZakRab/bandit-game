@@ -13,88 +13,85 @@ import {
   getPersonaById,
 } from "@/lib/game-config";
 
+const GAME_URL = "https://bandit-game.vercel.app";
+
 // ── Slide definitions ──────────────────────────────────────
 
 interface Slide {
   type: "content" | "qr" | "game" | "reveal";
-  title: string;
-  presenter: string;
-  round?: number; // which round this game slide controls
-  content: React.ReactNode;
+  round?: number;
+  render: () => React.ReactNode;
 }
 
-function useSlides(gameUrl: string): Slide[] {
+function useSlides(): Slide[] {
   return [
     // 0 — Title
     {
       type: "content",
-      title: "",
-      presenter: "Wilson",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full text-center">
-          <h1 className="text-6xl font-bold text-white mb-4">MULTI-ARMED BANDITS</h1>
-          <p className="text-2xl text-muted mb-8">Optimal Decision-Making Under Uncertainty</p>
-          <p className="text-lg text-muted">Lance | Wilson | Zak | Tatum | Kenny</p>
-          <p className="text-sm text-muted mt-2">March 26, 2026</p>
+          <div className="slide-enter text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 leading-tight">
+            MULTI-ARMED BANDITS
+          </div>
+          <div className="slide-enter-delay-1 text-2xl text-slate-400 font-light tracking-wide mb-12">
+            Optimal Decision-Making Under Uncertainty
+          </div>
+          <div className="slide-enter-delay-2 flex items-center gap-3">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent to-slate-600" />
+            <span className="text-sm text-slate-500 tracking-widest uppercase">Lance &middot; Wilson &middot; Zak &middot; Tatum &middot; Kenny</span>
+            <div className="h-px w-16 bg-gradient-to-l from-transparent to-slate-600" />
+          </div>
         </div>
       ),
     },
     // 1 — Exploration vs Exploitation
     {
       type: "content",
-      title: "The Exploration-Exploitation Dilemma",
-      presenter: "Wilson",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full">
-          <p className="text-xl text-muted mb-10 text-center max-w-2xl">
-            You have multiple options. Each has an unknown success rate.
-            You have <span className="text-white font-semibold">limited attempts</span>. What do you do?
+          <h1 className="slide-enter text-5xl font-bold text-white mb-4">The Exploration-Exploitation Dilemma</h1>
+          <p className="slide-enter-delay-1 text-xl text-slate-400 mb-14 text-center max-w-2xl">
+            You have multiple options with unknown success rates and <span className="text-white font-semibold">limited attempts</span>. What do you do?
           </p>
-          <div className="grid grid-cols-3 gap-6 max-w-3xl w-full">
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-              <div className="text-3xl mb-3">🎯</div>
-              <div className="text-xl font-bold text-red-400 mb-2">EXPLOIT</div>
-              <div className="text-sm text-muted">Pick what&apos;s worked so far</div>
-            </div>
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 text-center">
-              <div className="text-3xl mb-3">🔍</div>
-              <div className="text-xl font-bold text-blue-400 mb-2">EXPLORE</div>
-              <div className="text-sm text-muted">Try something new</div>
-            </div>
-            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6 text-center">
-              <div className="text-3xl mb-3">🧠</div>
-              <div className="text-xl font-bold text-purple-400 mb-2">MIX</div>
-              <div className="text-sm text-muted">Balance both intelligently</div>
-            </div>
+          <div className="grid grid-cols-3 gap-8 max-w-4xl w-full">
+            {[
+              { icon: "M15 11l-1-1m0 0l-1 1m1-1v4m0 0h4m-4 0H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z", title: "EXPLOIT", desc: "Pick what's worked so far", color: "from-red-500 to-orange-500", border: "border-red-500/30", bg: "bg-red-500/5", delay: "slide-enter-delay-1" },
+              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", title: "EXPLORE", desc: "Try something new", color: "from-blue-500 to-cyan-500", border: "border-blue-500/30", bg: "bg-blue-500/5", delay: "slide-enter-delay-2" },
+              { icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z", title: "MIX STRATEGICALLY", desc: "Balance both intelligently", color: "from-purple-500 to-pink-500", border: "border-purple-500/30", bg: "bg-purple-500/5", delay: "slide-enter-delay-3" },
+            ].map((item) => (
+              <div key={item.title} className={`${item.delay} ${item.bg} border ${item.border} rounded-2xl p-8 text-center hover:scale-105 transition-transform`}>
+                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${item.color} mb-4`}>
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+                </div>
+                <div className={`text-xl font-bold bg-gradient-to-r ${item.color} text-transparent bg-clip-text mb-2`}>{item.title}</div>
+                <div className="text-sm text-slate-400">{item.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       ),
     },
     // 2 — QR Code
-    {
-      type: "qr",
-      title: "Pull Out Your Phones",
-      presenter: "Wilson",
-      content: null, // rendered specially
-    },
+    { type: "qr", render: () => null },
     // 3 — How Game Works
     {
       type: "content",
-      title: "How the Game Works",
-      presenter: "Lance",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <div className="space-y-6 text-lg">
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-12">How the Game Works</h1>
+          <div className="space-y-6 w-full">
             {[
-              ["🎓", "You're a student building your professional network"],
-              ["🔢", "4 types of connections available to explore"],
-              ["🔒", "Each has a HIDDEN response rate you must discover"],
-              ["🎮", `3 rounds, ${ATTEMPTS_PER_ROUND} attempts per round = ${ROUNDS_COUNT * ATTEMPTS_PER_ROUND} total tries`],
-              ["🏆", "Goal: Maximize successful connections"],
-            ].map(([emoji, text], i) => (
-              <div key={i} className="flex items-center gap-4">
-                <span className="text-3xl">{emoji}</span>
-                <span className="text-white">{text}</span>
+              { icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", text: "You're a student building your professional network", color: "text-blue-400" },
+              { icon: "M4 6h16M4 10h16M4 14h16M4 18h16", text: "4 types of connections available to explore", color: "text-green-400" },
+              { icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", text: "Each has a HIDDEN response rate you must discover", color: "text-yellow-400" },
+              { icon: "M13 10V3L4 14h7v7l9-11h-7z", text: `3 rounds, ${ATTEMPTS_PER_ROUND} attempts per round = ${ROUNDS_COUNT * ATTEMPTS_PER_ROUND} total tries`, color: "text-purple-400" },
+              { icon: "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z", text: "Goal: Maximize successful connections", color: "text-pink-400" },
+            ].map((item, i) => (
+              <div key={i} className={`slide-enter-delay-${i + 1} flex items-center gap-5 bg-slate-800/50 rounded-xl p-5 border border-slate-700/50`}>
+                <div className={`shrink-0 ${item.color}`}>
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+                </div>
+                <span className="text-lg text-white">{item.text}</span>
               </div>
             ))}
           </div>
@@ -104,66 +101,67 @@ function useSlides(gameUrl: string): Slide[] {
     // 4 — Connection Types
     {
       type: "content",
-      title: "The 4 Connection Types",
-      presenter: "Lance",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full">
-          <div className="grid grid-cols-2 gap-6 max-w-2xl w-full mb-8">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-12">The 4 Connection Types</h1>
+          <div className="grid grid-cols-4 gap-6 max-w-4xl w-full mb-10">
             {[
-              { emoji: "🎓", name: "YOUR MAJOR", desc: "Students in your field" },
-              { emoji: "🔬", name: "ADJACENT FIELDS", desc: "Related but different majors" },
-              { emoji: "🌍", name: "DIFFERENT COLLEGES", desc: "Completely different areas" },
-              { emoji: "💼", name: "ALUMNI / PROS", desc: "People who've graduated" },
-            ].map((t, i) => (
-              <div key={i} className="bg-card border border-card-border rounded-xl p-6 text-center">
-                <div className="text-4xl mb-3">{t.emoji}</div>
-                <div className="text-lg font-bold text-white mb-1">{t.name}</div>
-                <div className="text-sm text-muted">{t.desc}</div>
+              { icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", name: "YOUR MAJOR", desc: "Students in your field", gradient: "from-blue-500 to-blue-600", delay: "slide-enter-delay-1" },
+              { icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z", name: "ADJACENT FIELDS", desc: "Related but different majors", gradient: "from-emerald-500 to-teal-600", delay: "slide-enter-delay-2" },
+              { icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z", name: "DIFFERENT COLLEGES", desc: "Completely different areas", gradient: "from-amber-500 to-orange-600", delay: "slide-enter-delay-3" },
+              { icon: "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", name: "ALUMNI / PROS", desc: "People who've graduated", gradient: "from-violet-500 to-purple-600", delay: "slide-enter-delay-4" },
+            ].map((t) => (
+              <div key={t.name} className={`${t.delay} group relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/30 p-6 text-center hover:scale-105 transition-transform`}>
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${t.gradient}`} />
+                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${t.gradient} mb-4 mt-2`}>
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={t.icon} /></svg>
+                </div>
+                <div className={`text-sm font-bold tracking-wider bg-gradient-to-r ${t.gradient} text-transparent bg-clip-text mb-2`}>{t.name}</div>
+                <div className="text-xs text-slate-400">{t.desc}</div>
               </div>
             ))}
           </div>
-          <p className="text-xl text-accent font-semibold">Which is best? You&apos;ll have to discover through exploration!</p>
+          <p className="slide-enter-delay-5 text-xl italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+            Which is best? You&apos;ll have to discover through exploration!
+          </p>
         </div>
       ),
     },
-    // 5 — Round 1 Game
+    // 5 — Round 1
     {
-      type: "game",
-      title: "Round 1 — Play Now",
-      presenter: "Zak",
-      round: 1,
-      content: (
+      type: "game", round: 1,
+      render: () => (
         <div className="text-center mb-6">
-          <p className="text-2xl text-white font-semibold">No strategy — go with your gut!</p>
-          <p className="text-lg text-muted mt-2">{ATTEMPTS_PER_ROUND} attempts — Pick whatever feels right</p>
+          <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 1 — Play Now</h1>
+          <p className="slide-enter-delay-1 text-xl text-slate-400">No strategy — go with your gut!</p>
+          <p className="slide-enter-delay-2 text-base text-slate-500 mt-1">{ATTEMPTS_PER_ROUND} attempts &middot; Pick whatever feels right</p>
         </div>
       ),
     },
     // 6 — Epsilon-Greedy Intro
     {
       type: "content",
-      title: "Strategy 1: Epsilon-Greedy",
-      presenter: "Tatum",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <div className="grid grid-cols-2 gap-8 mb-10">
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
-              <div className="text-5xl font-bold text-green-400 mb-2">80%</div>
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Strategy 1: Epsilon-Greedy</h1>
+          <div className="grid grid-cols-2 gap-8 mb-10 w-full max-w-2xl">
+            <div className="slide-enter-delay-1 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-2xl p-8 text-center slide-glow">
+              <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-emerald-500 mb-2">80%</div>
               <div className="text-lg text-white font-semibold">EXPLOIT</div>
-              <div className="text-sm text-muted mt-1">best option so far</div>
+              <div className="text-sm text-slate-400 mt-1">best option so far</div>
             </div>
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-8 text-center">
-              <div className="text-5xl font-bold text-yellow-400 mb-2">20%</div>
+            <div className="slide-enter-delay-2 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 rounded-2xl p-8 text-center">
+              <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-400 to-amber-500 mb-2">20%</div>
               <div className="text-lg text-white font-semibold">EXPLORE</div>
-              <div className="text-sm text-muted mt-1">randomly</div>
+              <div className="text-sm text-slate-400 mt-1">randomly</div>
             </div>
           </div>
-          <div className="bg-card border border-card-border rounded-xl p-6 w-full">
-            <div className="text-sm text-muted mb-3 font-semibold">WHY IT WORKS</div>
-            <div className="space-y-2 text-white">
-              <p>Mostly exploits what works</p>
-              <p>Keeps exploring for better options</p>
-              <p>Guaranteed not to get stuck on a bad choice</p>
+          <div className="slide-enter-delay-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full max-w-2xl">
+            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-3 uppercase">Why it works</div>
+            <div className="space-y-2 text-slate-300">
+              {["Mostly exploits what works", "Keeps exploring for better options", "Guaranteed not to get stuck on a bad choice"].map((t, i) => (
+                <div key={i} className="flex items-center gap-3"><svg className="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t}</div>
+              ))}
             </div>
           </div>
         </div>
@@ -172,27 +170,24 @@ function useSlides(gameUrl: string): Slide[] {
     // 7 — Epsilon-Greedy Example
     {
       type: "content",
-      title: "Epsilon-Greedy: Example",
-      presenter: "Tatum",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <div className="bg-card border border-card-border rounded-xl p-6 w-full mb-6">
-            <div className="text-sm text-muted mb-3 font-semibold">YOUR ROUND 1 RESULTS</div>
-            <table className="w-full text-sm">
-              <thead><tr className="text-muted"><th className="text-left py-1">Type</th><th className="text-center">Tries</th><th className="text-center">Success</th><th className="text-center">Rate</th></tr></thead>
-              <tbody className="text-white">
-                <tr><td className="py-1">Your Major</td><td className="text-center">2</td><td className="text-center">1</td><td className="text-center">50%</td></tr>
-                <tr><td className="py-1">Adjacent Fields</td><td className="text-center">1</td><td className="text-center">0</td><td className="text-center">0%</td></tr>
-                <tr className="text-success font-semibold"><td className="py-1">Different Colleges</td><td className="text-center">1</td><td className="text-center">1</td><td className="text-center">100%</td></tr>
-                <tr><td className="py-1">Alumni/Pros</td><td className="text-center">0</td><td className="text-center">0</td><td className="text-center text-muted">—</td></tr>
-              </tbody>
-            </table>
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Epsilon-Greedy: Example</h1>
+          <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full mb-6">
+            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-3 uppercase">Your Round 1 Results</div>
+            <table className="w-full text-sm"><thead><tr className="text-slate-500 text-xs uppercase tracking-wider"><th className="text-left py-2">Type</th><th className="text-center">Tries</th><th className="text-center">Success</th><th className="text-center">Rate</th></tr></thead>
+              <tbody className="text-slate-300">
+                <tr className="border-t border-slate-700/50"><td className="py-2">Your Major</td><td className="text-center">2</td><td className="text-center">1</td><td className="text-center">50%</td></tr>
+                <tr className="border-t border-slate-700/50"><td className="py-2">Adjacent Fields</td><td className="text-center">1</td><td className="text-center">0</td><td className="text-center text-red-400">0%</td></tr>
+                <tr className="border-t border-slate-700/50 text-green-400 font-semibold"><td className="py-2">Different Colleges</td><td className="text-center">1</td><td className="text-center">1</td><td className="text-center">100%</td></tr>
+                <tr className="border-t border-slate-700/50"><td className="py-2">Alumni/Pros</td><td className="text-center">0</td><td className="text-center">0</td><td className="text-center text-slate-500">—</td></tr>
+              </tbody></table>
           </div>
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 w-full">
-            <div className="text-blue-400 font-semibold mb-3">FOR ROUND 2:</div>
-            <p className="text-white mb-2">Best so far: <span className="text-success font-bold">Different Colleges (100%)</span></p>
-            <p className="text-muted">~8 attempts → Pick Different (exploit)</p>
-            <p className="text-muted">~2 attempts → Try something random (explore)</p>
+          <div className="slide-enter-delay-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 w-full">
+            <div className="text-blue-400 font-bold mb-3 text-sm uppercase tracking-wider">For Round 2:</div>
+            <p className="text-white mb-2">Best so far: <span className="text-green-400 font-bold">Different Colleges (100%)</span></p>
+            <p className="text-slate-400">~8 attempts → Pick Different (exploit)</p>
+            <p className="text-slate-400">~2 attempts → Try something random (explore)</p>
           </div>
         </div>
       ),
@@ -200,11 +195,10 @@ function useSlides(gameUrl: string): Slide[] {
     // 8 — Epsilon-Greedy Code
     {
       type: "content",
-      title: "Epsilon-Greedy: The Code",
-      presenter: "Tatum",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <pre className="bg-card border border-card-border rounded-xl p-6 text-sm font-mono text-white w-full mb-6 overflow-x-auto">{`success_rate = {}
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Epsilon-Greedy: The Code</h1>
+          <pre className="slide-enter-delay-1 bg-slate-900 border border-slate-700/50 rounded-2xl p-8 text-sm font-mono text-slate-300 w-full mb-8 overflow-x-auto leading-relaxed">{`success_rate = {}
 for each connection_type:
     success_rate[type] = successes / attempts
 
@@ -215,54 +209,54 @@ else:                      # exploit
 
 pull(choice)
 update_stats(choice, outcome)`}</pre>
-          <div className="flex gap-6">
-            <div className="bg-card border border-card-border rounded-lg px-4 py-2 text-center">
-              <div className="text-accent font-bold">O(k)</div>
-              <div className="text-xs text-muted">per decision</div>
-            </div>
-            <div className="bg-card border border-card-border rounded-lg px-4 py-2 text-center">
-              <div className="text-accent font-bold">PRODUCTION</div>
-              <div className="text-xs text-muted">Amazon, Facebook</div>
-            </div>
+          <div className="slide-enter-delay-2 flex gap-6">
+            {[
+              { label: "O(k)", sub: "per decision", color: "from-blue-500 to-cyan-500" },
+              { label: "PRODUCTION", sub: "Amazon, Facebook", color: "from-purple-500 to-pink-500" },
+            ].map((b) => (
+              <div key={b.label} className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-6 py-3 text-center">
+                <div className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${b.color}`}>{b.label}</div>
+                <div className="text-xs text-slate-500">{b.sub}</div>
+              </div>
+            ))}
           </div>
         </div>
       ),
     },
-    // 9 — Round 2 Game
+    // 9 — Round 2
     {
-      type: "game",
-      title: "Round 2 — Play Now",
-      presenter: "Zak",
-      round: 2,
-      content: (
+      type: "game", round: 2,
+      render: () => (
         <div className="text-center mb-6">
-          <p className="text-2xl text-white font-semibold">Apply Epsilon-Greedy!</p>
-          <p className="text-lg text-muted mt-2">80% exploit your best option — 20% explore randomly</p>
+          <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 2 — Play Now</h1>
+          <p className="slide-enter-delay-1 text-xl text-blue-400">Apply Epsilon-Greedy!</p>
+          <p className="slide-enter-delay-2 text-base text-slate-500 mt-1">80% exploit your best &middot; 20% explore randomly</p>
         </div>
       ),
     },
     // 10 — Problem with Epsilon-Greedy
     {
       type: "content",
-      title: "The Problem with Epsilon-Greedy",
-      presenter: "Kenny",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <p className="text-2xl text-white mb-8 text-center">It treats all unknowns equally!</p>
-          <div className="grid grid-cols-2 gap-6 w-full mb-8">
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
-              <div className="text-lg text-white mb-2">Alumni: 5 tries → 1 success (20%)</div>
-              <div className="text-green-400 font-bold text-xl">HIGH CONFIDENCE</div>
-              <div className="text-sm text-muted mt-1">You know it&apos;s probably bad</div>
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-4">The Problem with Epsilon-Greedy</h1>
+          <p className="slide-enter-delay-1 text-xl text-slate-400 mb-10">It treats all unknowns equally!</p>
+          <div className="grid grid-cols-2 gap-8 w-full mb-8">
+            <div className="slide-enter-delay-2 bg-slate-800/50 border border-green-500/20 rounded-2xl p-8 text-center">
+              <div className="text-lg text-slate-300 mb-3">Alumni: 5 tries → 1 success (20%)</div>
+              <div className="inline-flex px-4 py-1.5 rounded-full bg-green-500/20 text-green-400 font-bold text-lg mb-2">HIGH CONFIDENCE</div>
+              <div className="text-sm text-slate-400">You know it&apos;s probably bad</div>
             </div>
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 text-center">
-              <div className="text-lg text-white mb-2">Different: 1 try → 1 success (100%)</div>
-              <div className="text-yellow-400 font-bold text-xl">HIGH UNCERTAINTY</div>
-              <div className="text-sm text-muted mt-1">Could be great, could be luck!</div>
+            <div className="slide-enter-delay-3 bg-slate-800/50 border border-yellow-500/20 rounded-2xl p-8 text-center">
+              <div className="text-lg text-slate-300 mb-3">Different: 1 try → 1 success (100%)</div>
+              <div className="inline-flex px-4 py-1.5 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-lg mb-2">HIGH UNCERTAINTY</div>
+              <div className="text-sm text-slate-400">Could be great, could be luck!</div>
             </div>
           </div>
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6 text-center w-full">
-            <p className="text-xl text-purple-400 font-bold">Thompson&apos;s Insight: Be optimistic about uncertainty</p>
+          <div className="slide-enter-delay-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-6 text-center w-full slide-glow">
+            <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+              Thompson&apos;s Insight: Be optimistic about uncertainty
+            </p>
           </div>
         </div>
       ),
@@ -270,28 +264,19 @@ update_stats(choice, outcome)`}</pre>
     // 11 — Thompson Sampling
     {
       type: "content",
-      title: "Thompson Sampling: Bayesian Approach",
-      presenter: "Kenny",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <div className="bg-card border border-card-border rounded-xl p-6 w-full mb-6">
-            <p className="text-lg text-white mb-4">Model each option as <span className="font-mono text-accent">Beta(successes + 1, failures + 1)</span></p>
-            <div className="space-y-4">
-              <div>
-                <div className="text-sm text-muted mb-1">Alumni: 5 tries, 1 success → Beta(2, 5)</div>
-                <div className="h-4 bg-card-border rounded-full overflow-hidden"><div className="h-full bg-green-500 rounded-full" style={{ width: "90%" }} /></div>
-                <div className="text-xs text-muted mt-0.5">Narrow — confident it&apos;s ~20%</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted mb-1">Different: 1 try, 1 success → Beta(2, 1)</div>
-                <div className="h-4 bg-card-border rounded-full overflow-hidden"><div className="h-full bg-yellow-500 rounded-full" style={{ width: "40%" }} /></div>
-                <div className="text-xs text-muted mt-0.5">Wide — could be anywhere from 10% to 90%!</div>
-              </div>
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Thompson Sampling</h1>
+          <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 w-full mb-6">
+            <p className="text-lg text-slate-300 mb-6">Model each option as <span className="font-mono text-purple-400">Beta(successes + 1, failures + 1)</span></p>
+            <div className="space-y-5">
+              <div><div className="text-sm text-slate-400 mb-1.5">Alumni: 5 tries, 1 success → Beta(2, 5)</div><div className="h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: "90%" }} /></div><div className="text-xs text-green-400 mt-1">Narrow — confident it&apos;s ~20%</div></div>
+              <div><div className="text-sm text-slate-400 mb-1.5">Different: 1 try, 1 success → Beta(2, 1)</div><div className="h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full" style={{ width: "35%" }} /></div><div className="text-xs text-yellow-400 mt-1">Wide — could be anywhere from 10% to 90%!</div></div>
             </div>
           </div>
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6 w-full text-center">
-            <p className="text-lg text-white font-semibold">THE ALGORITHM</p>
-            <p className="text-purple-300 mt-2">Sample from each distribution → Pick the highest sample</p>
+          <div className="slide-enter-delay-2 bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6 w-full text-center">
+            <p className="text-sm text-purple-300/60 uppercase tracking-wider mb-2 font-semibold">The Algorithm</p>
+            <p className="text-xl text-white">Sample from each distribution → Pick the highest sample</p>
           </div>
         </div>
       ),
@@ -299,114 +284,103 @@ update_stats(choice, outcome)`}</pre>
     // 12 — Thompson Code
     {
       type: "content",
-      title: "Thompson Sampling: The Code",
-      presenter: "Kenny",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <pre className="bg-card border border-card-border rounded-xl p-6 text-sm font-mono text-white w-full mb-6 overflow-x-auto">{`for each connection_type:
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Thompson Sampling: The Code</h1>
+          <pre className="slide-enter-delay-1 bg-slate-900 border border-slate-700/50 rounded-2xl p-8 text-base font-mono text-slate-300 w-full mb-8 overflow-x-auto leading-relaxed">{`for each connection_type:
     α = successes + 1
     β = failures + 1
     θ ~ Beta(α, β)   # Sample
 
 choice = argmax(θ)    # Pick highest`}</pre>
-          <div className="flex gap-6">
-            <div className="bg-card border border-card-border rounded-lg px-4 py-2 text-center">
-              <div className="text-accent font-bold">O(k)</div>
-              <div className="text-xs text-muted">per decision</div>
-            </div>
-            <div className="bg-card border border-card-border rounded-lg px-4 py-2 text-center">
-              <div className="text-purple-400 font-bold">O(log T)</div>
-              <div className="text-xs text-muted">regret — provably optimal!</div>
-            </div>
-            <div className="bg-card border border-card-border rounded-lg px-4 py-2 text-center">
-              <div className="text-accent font-bold">USED AT</div>
-              <div className="text-xs text-muted">Netflix, Google, FDA</div>
-            </div>
+          <div className="slide-enter-delay-2 flex gap-6">
+            {[
+              { label: "O(k)", sub: "per decision", color: "from-blue-500 to-cyan-500" },
+              { label: "O(log T)", sub: "regret — provably optimal!", color: "from-purple-500 to-pink-500" },
+              { label: "USED AT", sub: "Netflix, Google, FDA", color: "from-amber-500 to-orange-500" },
+            ].map((b) => (
+              <div key={b.label} className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-5 py-3 text-center">
+                <div className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${b.color}`}>{b.label}</div>
+                <div className="text-xs text-slate-500">{b.sub}</div>
+              </div>
+            ))}
           </div>
         </div>
       ),
     },
-    // 13 — Round 3 Game
+    // 13 — Round 3
     {
-      type: "game",
-      title: "Round 3 — Play Now",
-      presenter: "Zak",
-      round: 3,
-      content: (
+      type: "game", round: 3,
+      render: () => (
         <div className="text-center mb-6">
-          <p className="text-2xl text-white font-semibold">Apply Thompson Sampling!</p>
-          <p className="text-lg text-muted mt-2">Be optimistic about uncertainty — Explore what you&apos;re unsure about</p>
+          <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 3 — Play Now</h1>
+          <p className="slide-enter-delay-1 text-xl text-purple-400">Apply Thompson Sampling!</p>
+          <p className="slide-enter-delay-2 text-base text-slate-500 mt-1">Be optimistic about uncertainty &middot; Explore what you&apos;re unsure about</p>
         </div>
       ),
     },
     // 14 — Reveal
-    {
-      type: "reveal",
-      title: "The Reveal: Hidden Success Rates",
-      presenter: "Wilson",
-      content: null, // rendered from dashboard data
-    },
+    { type: "reveal", render: () => null },
     // 15 — Key Insight
     {
       type: "content",
-      title: "The Key Insight",
-      presenter: "Wilson",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <p className="text-2xl text-white mb-10 text-center">
-            There&apos;s no universal &quot;best&quot; strategy — it depends on <span className="text-accent">YOUR</span> context.
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-12">The Key Insight</h1>
+          <p className="slide-enter-delay-1 text-2xl text-slate-300 mb-12 text-center">
+            There&apos;s no universal &quot;best&quot; strategy — it depends on <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">YOUR context</span>.
           </p>
-          <div className="grid grid-cols-2 gap-4 w-full mb-8">
+          <div className="grid grid-cols-2 gap-5 w-full mb-10">
             {[
-              ["🎯", "CAREER GOALS", "Alumni & weak ties work best"],
-              ["🛠", "PROJECTS", "Complementary skills beat similarity"],
-              ["🔬", "RESEARCH", "Vertical connections — grad students, faculty"],
-              ["🌐", "COMMUNITY", "Bridging connections across groups"],
-            ].map(([emoji, title, desc], i) => (
-              <div key={i} className="bg-card border border-card-border rounded-xl p-4">
-                <div className="text-xl mb-1">{emoji} <span className="text-white font-semibold">{title}</span></div>
-                <div className="text-sm text-muted">{desc}</div>
+              { icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6", title: "CAREER GOALS", desc: "Alumni & weak ties work best", color: "from-blue-500 to-cyan-500" },
+              { icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z", title: "PROJECTS", desc: "Complementary skills beat similarity", color: "from-green-500 to-emerald-500" },
+              { icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z", title: "RESEARCH", desc: "Vertical connections — grad students, faculty", color: "from-amber-500 to-orange-500" },
+              { icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z", title: "COMMUNITY", desc: "Bridging connections across groups", color: "from-purple-500 to-pink-500" },
+            ].map((item, i) => (
+              <div key={item.title} className={`slide-enter-delay-${i + 1} bg-slate-800/30 border border-slate-700/50 rounded-xl p-5 flex items-center gap-4`}>
+                <div className={`shrink-0 p-2 rounded-lg bg-gradient-to-br ${item.color}`}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+                </div>
+                <div>
+                  <div className={`text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r ${item.color}`}>{item.title}</div>
+                  <div className="text-sm text-slate-400">{item.desc}</div>
+                </div>
               </div>
             ))}
           </div>
-          <p className="text-lg text-accent text-center font-semibold">
+          <p className="slide-enter-delay-5 text-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-semibold text-center">
             MAB helps you efficiently learn YOUR optimal strategy — that&apos;s why LinkedIn&apos;s algorithm is personalized.
           </p>
         </div>
       ),
     },
-    // 16 — Regret Analysis
+    // 16 — Regret
     {
       type: "content",
-      title: "Regret Analysis",
-      presenter: "Wilson",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <p className="text-lg text-muted mb-8 text-center">Regret = gap between optimal outcome and what you actually got</p>
-          <div className="grid grid-cols-3 gap-6 w-full mb-8">
-            <div className="bg-fail/10 border border-fail/30 rounded-xl p-6 text-center">
-              <div className="text-xl font-bold text-fail mb-1">Random</div>
-              <div className="text-2xl font-mono text-white">O(T)</div>
-              <div className="text-sm text-muted mt-1">Linear — keeps making mistakes</div>
-            </div>
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 text-center">
-              <div className="text-xl font-bold text-blue-400 mb-1">Epsilon-Greedy</div>
-              <div className="text-2xl font-mono text-white">O(T<sup>2/3</sup>)</div>
-              <div className="text-sm text-muted mt-1">Sublinear — good</div>
-            </div>
-            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6 text-center">
-              <div className="text-xl font-bold text-purple-400 mb-1">Thompson</div>
-              <div className="text-2xl font-mono text-white">O(log T)</div>
-              <div className="text-sm text-muted mt-1">Logarithmic — optimal!</div>
-            </div>
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-4">Regret Analysis</h1>
+          <p className="slide-enter-delay-1 text-lg text-slate-400 mb-10">Regret = gap between optimal outcome and what you actually got</p>
+          <div className="grid grid-cols-3 gap-6 w-full mb-10">
+            {[
+              { title: "Random", big: "O(T)", desc: "Linear — keeps making mistakes", color: "from-red-500 to-rose-500", delay: "slide-enter-delay-2" },
+              { title: "Epsilon-Greedy", big: "O(T^2/3)", desc: "Sublinear — good", color: "from-blue-500 to-cyan-500", delay: "slide-enter-delay-3" },
+              { title: "Thompson", big: "O(log T)", desc: "Logarithmic — optimal!", color: "from-purple-500 to-pink-500", delay: "slide-enter-delay-4" },
+            ].map((c) => (
+              <div key={c.title} className={`${c.delay} bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 text-center`}>
+                <div className={`text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r ${c.color} mb-2`}>{c.title}</div>
+                <div className="text-3xl font-mono font-bold text-white mb-1">{c.big}</div>
+                <div className="text-sm text-slate-400">{c.desc}</div>
+              </div>
+            ))}
           </div>
-          <div className="relative h-40 w-full border-l-2 border-b-2 border-card-border">
-            <div className="absolute -left-16 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-muted whitespace-nowrap">Cumulative Regret</div>
-            <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-xs text-muted">Attempts</div>
+          <div className="slide-enter-delay-5 relative h-36 w-full max-w-2xl border-l-2 border-b-2 border-slate-700 ml-6">
+            <div className="absolute -left-14 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-slate-500 whitespace-nowrap">Cumulative Regret</div>
+            <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-xs text-slate-500">Attempts</div>
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M 0 100 L 100 10" stroke="#EF4444" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
-              <path d="M 0 100 Q 50 50 100 30" stroke="#3B82F6" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
-              <path d="M 0 100 Q 30 60 100 55" stroke="#8B5CF6" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
+              <path d="M 0 100 L 100 10" stroke="#EF4444" strokeWidth="2.5" fill="none" vectorEffect="non-scaling-stroke" />
+              <path d="M 0 100 Q 50 50 100 30" stroke="#3B82F6" strokeWidth="2.5" fill="none" vectorEffect="non-scaling-stroke" />
+              <path d="M 0 100 Q 30 60 100 55" stroke="#8B5CF6" strokeWidth="2.5" fill="none" vectorEffect="non-scaling-stroke" />
             </svg>
           </div>
         </div>
@@ -415,23 +389,24 @@ choice = argmax(θ)    # Pick highest`}</pre>
     // 17 — Real-World Applications
     {
       type: "content",
-      title: "Real-World Applications",
-      presenter: "Lance",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <div className="grid grid-cols-3 gap-4 w-full">
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-12">Real-World Applications</h1>
+          <div className="grid grid-cols-3 gap-5 w-full">
             {[
-              ["🏥", "Clinical Trials", "FDA-approved adaptive treatment allocation"],
-              ["🧪", "A/B Testing", "Google, Facebook, Amazon feature testing"],
-              ["📢", "Online Advertising", "Meta ads platform — which creative to show"],
-              ["💰", "Resource Allocation", "Portfolio optimization & budget decisions"],
-              ["🎬", "Recommendations", "Netflix, TikTok, YouTube — what to show next"],
-              ["🌐", "Network Routing", "AWS load balancing — which server path"],
-            ].map(([emoji, title, desc], i) => (
-              <div key={i} className="bg-card border border-card-border rounded-xl p-4">
-                <div className="text-2xl mb-2">{emoji}</div>
-                <div className="text-white font-semibold mb-1">{title}</div>
-                <div className="text-xs text-muted">{desc}</div>
+              { icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z", title: "Clinical Trials", desc: "FDA-approved adaptive treatment allocation", color: "from-red-500 to-rose-500" },
+              { icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z", title: "A/B Testing", desc: "Google, Facebook, Amazon feature testing", color: "from-blue-500 to-cyan-500" },
+              { icon: "M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z", title: "Online Advertising", desc: "Meta ads platform — which creative to show", color: "from-amber-500 to-orange-500" },
+              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", title: "Resource Allocation", desc: "Portfolio optimization & budget decisions", color: "from-green-500 to-emerald-500" },
+              { icon: "M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z", title: "Recommendations", desc: "Netflix, TikTok, YouTube — what to show next", color: "from-purple-500 to-pink-500" },
+              { icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z", title: "Network Routing", desc: "AWS load balancing — which server path", color: "from-indigo-500 to-violet-500" },
+            ].map((item, i) => (
+              <div key={item.title} className={`slide-enter-delay-${Math.min(i + 1, 5)} bg-slate-800/30 border border-slate-700/50 rounded-xl p-5`}>
+                <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${item.color} mb-3`}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+                </div>
+                <div className="text-white font-semibold mb-1">{item.title}</div>
+                <div className="text-xs text-slate-400">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -441,27 +416,27 @@ choice = argmax(θ)    # Pick highest`}</pre>
     // 18 — Why This Matters
     {
       type: "content",
-      title: "Why This Matters",
-      presenter: "Lance",
-      content: (
+      render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <div className="bg-card border border-card-border rounded-xl p-6 w-full mb-6">
-            <div className="text-sm text-muted mb-3 font-semibold">REAL-WORLD OPTIMIZATION HAS:</div>
-            <div className="space-y-2 text-white">
-              <p>Unknown parameters — you don&apos;t know rates upfront</p>
-              <p>Limited resources — can&apos;t try everything infinitely</p>
-              <p>Changing conditions — preferences drift over time</p>
-              <p>Cost of exploration — every failed attempt has a cost</p>
+          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Why This Matters</h1>
+          <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full mb-8">
+            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-4 uppercase">Real-world optimization has:</div>
+            <div className="space-y-3">
+              {["Unknown parameters — you don't know rates upfront", "Limited resources — can't try everything infinitely", "Changing conditions — preferences drift over time", "Cost of exploration — every failed attempt has a cost"].map((t, i) => (
+                <div key={i} className="flex items-center gap-3 text-slate-300">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 shrink-0" />{t}
+                </div>
+              ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 w-full">
-            <div className="bg-accent/10 border border-accent/30 rounded-xl p-6 text-center">
-              <div className="text-lg font-bold text-accent mb-1">MAB FRAMEWORK</div>
-              <div className="text-sm text-muted">A principled way to balance learning vs. earning</div>
+          <div className="slide-enter-delay-2 grid grid-cols-2 gap-4 w-full">
+            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-5 text-center">
+              <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-1">MAB FRAMEWORK</div>
+              <div className="text-sm text-slate-400">A principled way to balance learning vs. earning</div>
             </div>
-            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6 text-center">
-              <div className="text-lg font-bold text-purple-400 mb-1">THOMPSON SAMPLING</div>
-              <div className="text-sm text-muted">O(log T) regret — Provably near-optimal</div>
+            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-5 text-center slide-glow">
+              <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">THOMPSON SAMPLING</div>
+              <div className="text-sm text-slate-400">O(log T) regret — Provably near-optimal</div>
             </div>
           </div>
         </div>
@@ -470,107 +445,77 @@ choice = argmax(θ)    # Pick highest`}</pre>
     // 19 — Questions
     {
       type: "content",
-      title: "Questions?",
-      presenter: "All",
-      content: (
-        <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center">
-          <div className="space-y-6 text-lg text-muted mb-10">
-            <p className="text-white">When is exploration unethical?</p>
-            <p className="text-white">What if probabilities change over time?</p>
-            <p className="text-white">Where else do you see explore-exploit tradeoffs?</p>
+      render: () => (
+        <div className="flex flex-col items-center justify-center h-full text-center">
+          <h1 className="slide-enter text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-12">Questions?</h1>
+          <div className="slide-enter-delay-1 space-y-5 text-xl text-slate-300 mb-12">
+            <p>When is exploration unethical?</p>
+            <p>What if probabilities change over time?</p>
+            <p>Where else do you see explore-exploit tradeoffs?</p>
           </div>
-          <p className="text-muted">Lance | Wilson | Zak | Tatum | Kenny</p>
+          <div className="slide-enter-delay-2 flex items-center gap-3">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent to-slate-600" />
+            <span className="text-sm text-slate-500 tracking-widest uppercase">Lance &middot; Wilson &middot; Zak &middot; Tatum &middot; Kenny</span>
+            <div className="h-px w-16 bg-gradient-to-l from-transparent to-slate-600" />
+          </div>
         </div>
       ),
     },
   ];
 }
 
-// ── Game Dashboard Component (embedded in game slides) ─────
+// ── Game Dashboard (embedded in game slides) ───────────────
 
 function GameDashboard({ round }: { round: number }) {
   const players = useQuery(api.game.getPlayers) ?? [];
   const allChoices = useQuery(api.game.getAllChoices) ?? [];
-
   const ROUND_LABELS = ["", "Gut Feeling", "Epsilon-Greedy", "Thompson Sampling"];
+  const rc = allChoices.filter((c) => c.round === round);
 
-  const roundChoicesData = allChoices.filter((c) => c.round === round);
-
-  const choiceDistribution = () => {
-    const total = roundChoicesData.length || 1;
-    return CONNECTION_TYPES.map((type) => {
-      const count = roundChoicesData.filter((c) => c.choice === type.id).length;
-      return { ...type, count, pct: Math.round((count / total) * 100) };
-    });
+  const dist = () => {
+    const total = rc.length || 1;
+    return CONNECTION_TYPES.map((t) => { const count = rc.filter((c) => c.choice === t.id).length; return { ...t, count, pct: Math.round((count / total) * 100) }; });
   };
-
-  const roundAvg = () => {
-    const playerIds = [...new Set(roundChoicesData.map((c) => c.visitorId))];
-    if (playerIds.length === 0) return 0;
-    const total = playerIds.reduce((sum, pid) => {
-      return sum + roundChoicesData.filter((c) => c.visitorId === pid && c.success).length;
-    }, 0);
-    return total / playerIds.length;
+  const avg = () => {
+    const pids = [...new Set(rc.map((c) => c.visitorId))];
+    if (!pids.length) return 0;
+    return pids.reduce((s, p) => s + rc.filter((c) => c.visitorId === p && c.success).length, 0) / pids.length;
   };
-
-  const playersCompleted = () => {
-    const playerIds = [...new Set(roundChoicesData.map((c) => c.visitorId))];
-    return playerIds.filter(
-      (pid) => roundChoicesData.filter((c) => c.visitorId === pid).length >= ATTEMPTS_PER_ROUND
-    ).length;
+  const done = () => {
+    const pids = [...new Set(rc.map((c) => c.visitorId))];
+    return pids.filter((p) => rc.filter((c) => c.visitorId === p).length >= ATTEMPTS_PER_ROUND).length;
   };
-
-  const leaderboard = () => {
-    const playerIds = [...new Set(roundChoicesData.map((c) => c.visitorId))];
-    return playerIds
-      .map((pid) => {
-        const pc = roundChoicesData.filter((c) => c.visitorId === pid);
-        const player = players.find((p) => p.visitorId === pid);
-        return {
-          pid,
-          name: player?.name || "Unknown",
-          successes: pc.filter((c) => c.success).length,
-        };
-      })
-      .sort((a, b) => b.successes - a.successes);
+  const lb = () => {
+    const pids = [...new Set(rc.map((c) => c.visitorId))];
+    return pids.map((p) => ({ p, name: players.find((pl) => pl.visitorId === p)?.name || "?", s: rc.filter((c) => c.visitorId === p && c.success).length })).sort((a, b) => b.s - a.s);
   };
 
   return (
     <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
-      {/* Choice Distribution */}
-      <div className="bg-card border border-card-border rounded-xl p-4">
-        <h3 className="text-xs text-muted mb-3">Choice Distribution</h3>
-        <div className="space-y-2">
-          {choiceDistribution().map((item) => (
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-3">Choice Distribution</h3>
+        <div className="space-y-2.5">
+          {dist().map((item) => (
             <div key={item.id}>
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-xs text-white">{item.emoji} {item.label}</span>
-                <span className="text-xs text-muted">{item.count} ({item.pct}%)</span>
-              </div>
-              <div className="h-2 bg-card-border rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }} />
-              </div>
+              <div className="flex justify-between mb-0.5"><span className="text-xs text-slate-300">{item.emoji} {item.label}</span><span className="text-xs text-slate-500">{item.count} ({item.pct}%)</span></div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }} /></div>
             </div>
           ))}
         </div>
-        <div className="mt-4 pt-3 border-t border-card-border">
-          <div className="text-xs text-muted">Class Average</div>
-          <div className="text-2xl font-bold text-white">{roundAvg().toFixed(1)} <span className="text-sm text-muted">/ {ATTEMPTS_PER_ROUND}</span></div>
-        </div>
-        <div className="mt-2">
-          <div className="text-xs text-muted">{playersCompleted()} / {players.length} completed</div>
+        <div className="mt-5 pt-4 border-t border-slate-700/50">
+          <div className="text-xs text-slate-500">Class Average</div>
+          <div className="text-3xl font-bold text-white">{avg().toFixed(1)} <span className="text-sm text-slate-500">/ {ATTEMPTS_PER_ROUND}</span></div>
+          <div className="text-xs text-slate-500 mt-1">{done()} / {players.length} completed</div>
         </div>
       </div>
-
-      {/* Leaderboard */}
-      <div className="bg-card border border-card-border rounded-xl p-4 col-span-2 overflow-y-auto">
-        <h3 className="text-xs text-muted mb-3">Round {round} Leaderboard — {ROUND_LABELS[round]}</h3>
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 col-span-2 overflow-y-auto">
+        <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-3">Round {round}: {ROUND_LABELS[round]}</h3>
         <div className="space-y-1.5">
-          {leaderboard().map((entry, i) => (
-            <div key={entry.pid} className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
-              <span className="text-sm font-bold text-muted w-6">#{i + 1}</span>
-              <span className="text-sm text-white flex-1 truncate">{entry.name}</span>
-              <span className="text-sm font-bold text-accent">{entry.successes}/{ATTEMPTS_PER_ROUND}</span>
+          {lb().map((e, i) => (
+            <div key={e.p} className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2">
+              <span className={`text-sm font-bold w-6 ${i === 0 ? "text-yellow-400" : i === 1 ? "text-slate-300" : i === 2 ? "text-amber-700" : "text-slate-600"}`}>#{i + 1}</span>
+              <span className="text-sm text-white flex-1 truncate">{e.name}</span>
+              <span className="text-sm font-bold text-accent">{e.s}/{ATTEMPTS_PER_ROUND}</span>
             </div>
           ))}
         </div>
@@ -579,86 +524,47 @@ function GameDashboard({ round }: { round: number }) {
   );
 }
 
-// ── Reveal Dashboard Component ─────────────────────────────
+// ── Reveal Dashboard ───────────────────────────────────────
 
 function RevealDashboard() {
   const players = useQuery(api.game.getPlayers) ?? [];
   const allChoices = useQuery(api.game.getAllChoices) ?? [];
-
   const ROUND_LABELS = ["", "Gut Feeling", "Epsilon-Greedy", "Thompson Sampling"];
 
-  const roundAvg = (round: number) => {
-    const rc = allChoices.filter((c) => c.round === round);
-    const playerIds = [...new Set(rc.map((c) => c.visitorId))];
-    if (playerIds.length === 0) return 0;
-    const total = playerIds.reduce((sum, pid) => sum + rc.filter((c) => c.visitorId === pid && c.success).length, 0);
-    return total / playerIds.length;
+  const roundAvg = (r: number) => {
+    const rc = allChoices.filter((c) => c.round === r);
+    const pids = [...new Set(rc.map((c) => c.visitorId))];
+    if (!pids.length) return 0;
+    return pids.reduce((s, p) => s + rc.filter((c) => c.visitorId === p && c.success).length, 0) / pids.length;
   };
-
-  const leaderboard = (round: number) => {
-    const rc = allChoices.filter((c) => c.round === round);
-    const playerIds = [...new Set(rc.map((c) => c.visitorId))];
-    return playerIds
-      .map((pid) => {
-        const pc = rc.filter((c) => c.visitorId === pid);
-        const player = players.find((p) => p.visitorId === pid);
-        return { pid, name: player?.name || "Unknown", persona: player ? getPersonaById(player.persona) : null, successes: pc.filter((c) => c.success).length };
-      })
-      .sort((a, b) => b.successes - a.successes);
+  const lb = (r: number) => {
+    const rc = allChoices.filter((c) => c.round === r);
+    const pids = [...new Set(rc.map((c) => c.visitorId))];
+    return pids.map((p) => ({ p, name: players.find((pl) => pl.visitorId === p)?.name || "?", persona: players.find((pl) => pl.visitorId === p) ? getPersonaById(players.find((pl) => pl.visitorId === p)!.persona) : null, s: rc.filter((c) => c.visitorId === p && c.success).length })).sort((a, b) => b.s - a.s);
   };
 
   return (
     <div className="space-y-4 flex-1 overflow-y-auto">
-      {/* Score Progression */}
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="slide-enter grid grid-cols-3 gap-4 text-center">
         {[1, 2, 3].map((r) => (
-          <div key={r} className="bg-card border border-card-border rounded-xl p-4">
-            <div className="text-xs text-muted mb-1">Round {r} — {ROUND_LABELS[r]}</div>
-            <div className="text-3xl font-bold text-white">{roundAvg(r).toFixed(1)}</div>
-            <div className="text-xs text-muted">/ {ATTEMPTS_PER_ROUND}</div>
+          <div key={r} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+            <div className="text-xs text-slate-500 mb-1">{ROUND_LABELS[r]}</div>
+            <div className="text-4xl font-bold text-white">{roundAvg(r).toFixed(1)}</div>
+            <div className="text-xs text-slate-500">/ {ATTEMPTS_PER_ROUND}</div>
           </div>
         ))}
       </div>
-
-      {/* Hidden Rates */}
-      <div className="bg-card border border-card-border rounded-xl p-4">
+      <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-muted">
-                <th className="text-left py-1 pr-3">Persona</th>
-                {CONNECTION_TYPES.map((t) => (<th key={t.id} className="text-center py-1 px-2">{t.emoji} {t.label}</th>))}
-              </tr>
-            </thead>
-            <tbody>
-              {PERSONAS.map((p) => (
-                <tr key={p.id} className="border-t border-card-border">
-                  <td className="py-1 pr-3 text-white font-medium">{p.name} <span className="text-muted text-xs">({p.major})</span></td>
-                  {CONNECTION_TYPES.map((t) => {
-                    const isBest = p.bestConnection === t.id;
-                    return (<td key={t.id} className={`text-center py-1 px-2 font-mono ${isBest ? "text-success font-bold" : "text-muted"}`}>{Math.round(p.rates[t.id] * 100)}%</td>);
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <table className="w-full text-sm"><thead><tr className="text-slate-500 text-xs uppercase tracking-wider"><th className="text-left py-1.5 pr-3">Persona</th>{CONNECTION_TYPES.map((t) => (<th key={t.id} className="text-center py-1.5 px-2">{t.emoji} {t.label}</th>))}</tr></thead>
+            <tbody>{PERSONAS.map((p) => (<tr key={p.id} className="border-t border-slate-700/30">{[<td key="name" className="py-1.5 pr-3 text-white font-medium">{p.name} <span className="text-slate-500 text-xs">({p.major})</span></td>, ...CONNECTION_TYPES.map((t) => (<td key={t.id} className={`text-center py-1.5 px-2 font-mono ${p.bestConnection === t.id ? "text-green-400 font-bold" : "text-slate-500"}`}>{Math.round(p.rates[t.id] * 100)}%</td>))]}</tr>))}</tbody></table>
         </div>
       </div>
-
-      {/* Per-round leaderboards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="slide-enter-delay-2 grid grid-cols-3 gap-4">
         {[1, 2, 3].map((r) => (
-          <div key={r} className="bg-card border border-card-border rounded-xl p-4">
-            <div className="text-xs text-muted mb-2">{ROUND_LABELS[r]}</div>
-            <div className="space-y-1">
-              {leaderboard(r).slice(0, 8).map((e, i) => (
-                <div key={e.pid} className="flex items-center gap-1.5 text-xs">
-                  <span className="text-muted w-4">#{i + 1}</span>
-                  <span className="text-white truncate flex-1">{e.name}</span>
-                  <span className="text-accent font-bold">{e.successes}/{ATTEMPTS_PER_ROUND}</span>
-                </div>
-              ))}
-            </div>
+          <div key={r} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+            <div className="text-xs text-slate-500 mb-2 uppercase tracking-wider">{ROUND_LABELS[r]}</div>
+            <div className="space-y-1">{lb(r).slice(0, 8).map((e, i) => (<div key={e.p} className="flex items-center gap-1.5 text-xs"><span className={`w-4 ${i === 0 ? "text-yellow-400 font-bold" : "text-slate-600"}`}>#{i + 1}</span><span className="text-white truncate flex-1">{e.name}</span><span className="text-accent font-bold">{e.s}/{ATTEMPTS_PER_ROUND}</span></div>))}</div>
           </div>
         ))}
       </div>
@@ -666,158 +572,109 @@ function RevealDashboard() {
   );
 }
 
-// ── Main Presenter Page ────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────
 
 export default function PresentPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authed, setAuthed] = useState(false);
   const [code, setCode] = useState("");
-  const [slideIndex, setSlideIndex] = useState(0);
-  const [gameUrl, setGameUrl] = useState("");
+  const [si, setSi] = useState(0);
 
   const gameState = useQuery(api.game.getState);
   const setRound = useMutation(api.game.setRound);
   const resetGameMut = useMutation(api.game.resetGame);
+  const slides = useSlides();
+  const slide = slides[si];
+  const cr = gameState?.currentRound ?? 0;
+  const ra = gameState?.roundActive ?? false;
 
-  const slides = useSlides(gameUrl);
-  const slide = slides[slideIndex];
-  const currentRound = gameState?.currentRound ?? 0;
-  const roundActive = gameState?.roundActive ?? false;
-
+  useEffect(() => { if (localStorage.getItem("bandit_dashboard_auth") === "true") setAuthed(true); }, []);
   useEffect(() => {
-    setGameUrl(process.env.NEXT_PUBLIC_GAME_URL || window.location.origin);
-  }, []);
-
-  useEffect(() => {
-    if (localStorage.getItem("bandit_dashboard_auth") === "true") setAuthenticated(true);
-  }, []);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        setSlideIndex((i) => Math.min(i + 1, slides.length - 1));
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setSlideIndex((i) => Math.max(i - 1, 0));
-      }
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); setSi((i) => Math.min(i + 1, slides.length - 1)); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); setSi((i) => Math.max(i - 1, 0)); }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [slides.length]);
 
-  const handleAuth = () => {
-    if (code === DASHBOARD_CODE) {
-      setAuthenticated(true);
-      localStorage.setItem("bandit_dashboard_auth", "true");
-    }
-  };
+  const startR = useCallback((r: number) => setRound({ currentRound: r, roundActive: true }), [setRound]);
+  const endR = useCallback(() => setRound({ currentRound: cr, roundActive: false }), [setRound, cr]);
+  const reveal = useCallback(() => setRound({ currentRound: ROUNDS_COUNT + 1, roundActive: false }), [setRound]);
 
-  const startRound = useCallback((round: number) => setRound({ currentRound: round, roundActive: true }), [setRound]);
-  const endRound = useCallback(() => setRound({ currentRound, roundActive: false }), [setRound, currentRound]);
-  const showReveal = useCallback(() => setRound({ currentRound: ROUNDS_COUNT + 1, roundActive: false }), [setRound]);
+  const handleAuth = () => { if (code === DASHBOARD_CODE) { setAuthed(true); localStorage.setItem("bandit_dashboard_auth", "true"); } };
 
-  if (!authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-card border border-card-border rounded-xl p-8 max-w-sm w-full mx-4">
-          <h1 className="text-xl font-bold text-white mb-4 text-center">Presenter Mode</h1>
-          <input type="password" value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAuth()} placeholder="Enter access code" className="w-full px-4 py-3 bg-background border border-card-border rounded-lg text-white placeholder-muted focus:outline-none focus:border-accent" />
-          <button onClick={handleAuth} className="w-full mt-3 px-4 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/80 transition-colors">Enter</button>
-        </div>
+  if (!authed) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="bg-card border border-card-border rounded-xl p-8 max-w-sm w-full mx-4">
+        <h1 className="text-xl font-bold text-white mb-4 text-center">Presenter Mode</h1>
+        <input type="password" value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAuth()} placeholder="Access code" className="w-full px-4 py-3 bg-background border border-card-border rounded-lg text-white placeholder-muted focus:outline-none focus:border-accent" />
+        <button onClick={handleAuth} className="w-full mt-3 px-4 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/80">Enter</button>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Slide Content */}
-      <div className="flex-1 flex flex-col p-8 min-h-0">
-        {/* Title bar */}
-        {slide.title && (
-          <div className="mb-4 shrink-0">
-            <h1 className="text-4xl font-bold text-white">{slide.title}</h1>
-            <div className="text-sm text-muted mt-1">{slide.presenter}</div>
-          </div>
-        )}
-
+    <div className="h-screen flex flex-col bg-[#0a0f1a] overflow-hidden" key={si}>
+      <div className="flex-1 flex flex-col p-10 min-h-0">
         {/* QR slide */}
-        {slide.type === "qr" && gameUrl && (
+        {slide.type === "qr" && (
           <div className="flex-1 flex flex-col items-center justify-center">
-            <QRCodeSVG value={`${gameUrl}/play`} size={300} level="H" bgColor="transparent" fgColor="#ffffff" />
-            <p className="mt-4 text-lg text-muted font-mono">{gameUrl}/play</p>
+            <h1 className="slide-enter text-5xl font-bold text-white mb-10">Pull Out Your Phones</h1>
+            <div className="slide-scale bg-white p-6 rounded-3xl shadow-2xl shadow-blue-500/20 mb-6">
+              <QRCodeSVG value={`${GAME_URL}/play`} size={320} level="H" />
+            </div>
+            <p className="slide-enter-delay-2 text-lg text-slate-400 font-mono">{GAME_URL}/play</p>
           </div>
         )}
 
         {/* Content slide */}
-        {slide.type === "content" && <div className="flex-1 min-h-0">{slide.content}</div>}
+        {slide.type === "content" && <div className="flex-1 min-h-0">{slide.render()}</div>}
 
         {/* Game slide */}
         {slide.type === "game" && slide.round && (
           <div className="flex-1 flex flex-col min-h-0">
-            {slide.content}
-            {/* Round controls */}
+            {slide.render()}
             <div className="flex items-center gap-3 mb-4 shrink-0">
-              {!roundActive && currentRound !== slide.round && (
-                <button onClick={() => startRound(slide.round!)} className="px-5 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/80">
-                  Start Round {slide.round}
-                </button>
+              {!ra && cr !== slide.round && (
+                <button onClick={() => startR(slide.round!)} className="px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:opacity-90 transition">Start Round {slide.round}</button>
               )}
-              {roundActive && currentRound === slide.round && (
-                <button onClick={endRound} className="px-5 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400">
-                  End Round {slide.round}
-                </button>
+              {ra && cr === slide.round && (
+                <button onClick={endR} className="px-5 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition">End Round {slide.round}</button>
               )}
-              {!roundActive && currentRound === slide.round && (
+              {!ra && cr === slide.round && (
                 <>
-                  <button onClick={() => startRound(slide.round!)} className="px-5 py-2 bg-card-border text-white rounded-lg font-medium hover:bg-muted text-sm">
-                    Re-open Round {slide.round}
-                  </button>
-                  <span className="text-success text-sm font-medium">Round {slide.round} complete</span>
+                  <button onClick={() => startR(slide.round!)} className="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm hover:bg-slate-600">Re-open</button>
+                  <span className="text-green-400 text-sm font-medium">Round complete</span>
                 </>
               )}
-              <span className={`px-2 py-0.5 rounded text-xs font-medium ml-auto ${roundActive && currentRound === slide.round ? "bg-success/20 text-success" : "bg-muted/20 text-muted"}`}>
-                {roundActive && currentRound === slide.round ? "LIVE" : "PAUSED"}
+              <span className={`ml-auto px-2.5 py-1 rounded-full text-xs font-semibold ${ra && cr === slide.round ? "bg-green-500/20 text-green-400" : "bg-slate-700/50 text-slate-500"}`}>
+                {ra && cr === slide.round ? "LIVE" : "PAUSED"}
               </span>
             </div>
             <GameDashboard round={slide.round} />
           </div>
         )}
 
-        {/* Reveal slide */}
+        {/* Reveal */}
         {slide.type === "reveal" && (
           <div className="flex-1 flex flex-col min-h-0">
             <div className="flex items-center gap-3 mb-4 shrink-0">
-              {currentRound <= ROUNDS_COUNT && (
-                <button onClick={showReveal} className="px-5 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-400">
-                  Show Reveal to Players
-                </button>
-              )}
-              {currentRound > ROUNDS_COUNT && <span className="text-purple-400 text-sm font-medium">Players can see the reveal</span>}
+              <h1 className="text-4xl font-bold text-white">The Reveal</h1>
+              <div className="ml-auto">
+                {cr <= ROUNDS_COUNT && <button onClick={reveal} className="px-5 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90">Reveal to Players</button>}
+                {cr > ROUNDS_COUNT && <span className="text-purple-400 text-sm">Players can see results</span>}
+              </div>
             </div>
             <RevealDashboard />
           </div>
         )}
       </div>
 
-      {/* Bottom Bar */}
-      <div className="shrink-0 border-t border-card-border bg-card px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSlideIndex((i) => Math.max(i - 1, 0))} disabled={slideIndex === 0} className="px-3 py-1.5 bg-background rounded text-sm text-white disabled:opacity-30">
-            ← Prev
-          </button>
-          <button onClick={() => setSlideIndex((i) => Math.min(i + 1, slides.length - 1))} disabled={slideIndex === slides.length - 1} className="px-3 py-1.5 bg-background rounded text-sm text-white disabled:opacity-30">
-            Next →
-          </button>
-          <span className="text-sm text-muted ml-2">
-            {slideIndex + 1} / {slides.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-muted">
-          <span>Presenter: <span className="text-white">{slide.presenter}</span></span>
-          <span>← → or Space to navigate</span>
-          <button onClick={async () => { if (confirm("Reset all game data?")) await resetGameMut(); }} className="text-fail hover:text-fail/80">Reset</button>
-        </div>
+      {/* Minimal floating nav */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-full px-4 py-2">
+        <button onClick={() => setSi((i) => Math.max(i - 1, 0))} disabled={si === 0} className="text-slate-400 hover:text-white disabled:opacity-20 transition px-1">←</button>
+        <span className="text-xs text-slate-500 w-12 text-center">{si + 1}/{slides.length}</span>
+        <button onClick={() => setSi((i) => Math.min(i + 1, slides.length - 1))} disabled={si === slides.length - 1} className="text-slate-400 hover:text-white disabled:opacity-20 transition px-1">→</button>
       </div>
     </div>
   );
