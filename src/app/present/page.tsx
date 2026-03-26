@@ -18,7 +18,7 @@ const GAME_URL = "https://bandit-game.vercel.app";
 // ── Slide definitions ──────────────────────────────────────
 
 interface Slide {
-  type: "content" | "qr" | "game" | "reveal";
+  type: "content" | "qr" | "game" | "reveal" | "regret";
   round?: number;
   presenter: string;
   render: () => React.ReactNode;
@@ -375,7 +375,9 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 14 — Reveal
     { type: "reveal", presenter: "W", render: () => null },
-    // 15 — Key Insight
+    // 15 — Live Regret Analysis (from real game data)
+    { type: "regret", presenter: "W", render: () => null },
+    // 16 — Key Insight
     {
       type: "content", presenter: "W",
       render: () => (
@@ -626,6 +628,129 @@ function RevealDashboard() {
   );
 }
 
+// ── Live Regret Analysis ───────────────────────────────────
+
+function RegretDashboard() {
+  const players = useQuery(api.game.getPlayers) ?? [];
+  const allChoices = useQuery(api.game.getAllChoices) ?? [];
+  const ROUND_LABELS = ["", "Gut Feeling", "Epsilon-Greedy", "Thompson Sampling"];
+  const ROUND_COLORS = ["", "#9ca3af", "#3b82f6", "#8b5cf6"];
+
+  // For each player, compute per-round regret: optimal_expected - actual
+  const playerRegrets = () => {
+    const pids = [...new Set(allChoices.map((c) => c.visitorId))];
+    return pids.map((pid) => {
+      const player = players.find((p) => p.visitorId === pid);
+      const persona = player ? getPersonaById(player.persona) : null;
+      if (!persona) return null;
+      const bestRate = Math.max(...Object.values(persona.rates));
+      const optimalPerRound = bestRate * ATTEMPTS_PER_ROUND;
+
+      const rounds = [1, 2, 3].map((r) => {
+        const rc = allChoices.filter((c) => c.visitorId === pid && c.round === r);
+        const actual = rc.filter((c) => c.success).length;
+        return { round: r, actual, optimal: optimalPerRound, regret: optimalPerRound - actual };
+      });
+      return { pid, name: player?.name || "?", rounds };
+    }).filter(Boolean) as { pid: string; name: string; rounds: { round: number; actual: number; optimal: number; regret: number }[] }[];
+  };
+
+  const data = playerRegrets();
+  if (data.length === 0) return <div className="text-slate-500 text-center mt-20">No game data yet</div>;
+
+  // Class averages per round
+  const roundStats = [1, 2, 3].map((r) => {
+    const roundData = data.map((d) => d.rounds[r - 1]);
+    const avgActual = roundData.reduce((s, d) => s + d.actual, 0) / roundData.length;
+    const avgOptimal = roundData[0].optimal;
+    const avgRegret = roundData.reduce((s, d) => s + d.regret, 0) / roundData.length;
+    return { round: r, avgActual, avgOptimal, avgRegret };
+  });
+
+  const totalAvgRegret = roundStats.reduce((s, r) => s + r.avgRegret, 0);
+  const cumulativeRegret = roundStats.map((_, i) => roundStats.slice(0, i + 1).reduce((s, r) => s + r.avgRegret, 0));
+  const maxCumRegret = Math.max(...cumulativeRegret, 1);
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto space-y-5">
+      <h1 className="slide-enter text-5xl font-bold text-white">Your Regret Analysis</h1>
+      <p className="slide-enter-delay-1 text-lg text-slate-400">How much did each strategy cost you vs. always picking the optimal?</p>
+
+      {/* Per-round cards */}
+      <div className="slide-enter-delay-2 grid grid-cols-3 gap-5">
+        {roundStats.map((r) => (
+          <div key={r.round} className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+            <div className="text-sm text-slate-500 uppercase tracking-wider mb-1">{ROUND_LABELS[r.round]}</div>
+            <div className="flex items-end gap-3 mb-3">
+              <div className="text-4xl font-bold text-white">{r.avgActual.toFixed(1)}</div>
+              <div className="text-base text-slate-500 mb-1">/ {r.avgOptimal.toFixed(1)} optimal</div>
+            </div>
+            <div className="h-3 bg-slate-700 rounded-full overflow-hidden mb-2">
+              <div className="h-full rounded-full transition-all" style={{ width: `${(r.avgActual / r.avgOptimal) * 100}%`, backgroundColor: ROUND_COLORS[r.round] }} />
+            </div>
+            <div className="text-base font-semibold" style={{ color: ROUND_COLORS[r.round] }}>
+              Regret: {r.avgRegret.toFixed(1)} missed connections
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Cumulative regret bar chart + total */}
+      <div className="slide-enter-delay-3 grid grid-cols-2 gap-5">
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+          <div className="text-sm text-slate-500 uppercase tracking-wider mb-4">Cumulative Regret by Round</div>
+          <div className="flex items-end gap-6 h-40">
+            {cumulativeRegret.map((val, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                <div className="text-base font-bold text-white mb-1">{val.toFixed(1)}</div>
+                <div className="w-full rounded-t-lg transition-all" style={{ height: `${(val / maxCumRegret) * 100}%`, backgroundColor: ROUND_COLORS[i + 1], minHeight: "4px" }} />
+                <div className="text-sm text-slate-500 mt-2">R{i + 1}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
+          <div className="text-sm text-slate-500 uppercase tracking-wider mb-3">Total Class Regret</div>
+          <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-amber-400 mb-2">
+            {totalAvgRegret.toFixed(1)}
+          </div>
+          <div className="text-base text-slate-400">missed connections per player</div>
+          <div className="text-base text-slate-400 mt-1">out of {(roundStats[0].avgOptimal * 3).toFixed(1)} possible</div>
+          <div className="mt-4 text-base font-semibold text-slate-300">
+            {roundStats[2].avgRegret < roundStats[0].avgRegret
+              ? `Thompson cut regret by ${((1 - roundStats[2].avgRegret / roundStats[0].avgRegret) * 100).toFixed(0)}% vs gut feeling`
+              : "Strategies are learning — more attempts would show bigger gains"}
+          </div>
+        </div>
+      </div>
+
+      {/* Regret trend arrow */}
+      <div className="slide-enter-delay-4 bg-gradient-to-r from-red-500/5 via-blue-500/5 to-purple-500/5 border border-slate-700/50 rounded-2xl p-5">
+        <div className="flex items-center justify-between">
+          {roundStats.map((r, i) => (
+            <div key={r.round} className="flex-1 text-center">
+              <div className="text-sm text-slate-500 mb-1">{ROUND_LABELS[r.round]}</div>
+              <div className="text-2xl font-bold" style={{ color: ROUND_COLORS[r.round] }}>{r.avgRegret.toFixed(1)}</div>
+              <div className="text-sm text-slate-500">regret</div>
+              {i < 2 && (
+                <div className="inline-block mt-1">
+                  {roundStats[i + 1].avgRegret < r.avgRegret
+                    ? <span className="text-green-400 text-lg">→ ↓</span>
+                    : <span className="text-amber-400 text-lg">→</span>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-3 text-base text-slate-400">
+          Smarter algorithms → less regret → better outcomes
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────
 
 export default function PresentPage() {
@@ -720,6 +845,13 @@ export default function PresentPage() {
               </div>
             </div>
             <RevealDashboard />
+          </div>
+        )}
+
+        {/* Live Regret Analysis */}
+        {slide.type === "regret" && (
+          <div className="flex-1 flex flex-col min-h-0">
+            <RegretDashboard />
           </div>
         )}
       </div>
