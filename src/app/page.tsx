@@ -61,9 +61,9 @@ function getConfidence(s: Stats): { level: "unknown" | "low" | "medium" | "high"
   if (s.attempts === 0) return { level: "unknown", rate: 0, fillPct: 5 };
   const rate = s.successes / s.attempts;
   // Bar width = how much data you have (confidence), not the success rate
-  const fillPct = Math.min(100, (s.attempts / 10) * 100);
-  if (s.attempts <= 2) return { level: "low", rate, fillPct };
-  if (s.attempts <= 6) return { level: "medium", rate, fillPct };
+  const fillPct = Math.min(100, (s.attempts / 5) * 100);
+  if (s.attempts <= 1) return { level: "low", rate, fillPct };
+  if (s.attempts <= 3) return { level: "medium", rate, fillPct };
   return { level: "high", rate, fillPct };
 }
 
@@ -261,7 +261,7 @@ export default function PlayerPage() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-4xl mb-3">
-                  {roundChoices.filter((c) => c.success).length >= 7 ? "🔥" : "👍"}
+                  {roundChoices.filter((c) => c.success).length >= 4 ? "🔥" : "👍"}
                 </div>
                 <div className="text-lg font-semibold text-white">Round {currentRound} complete!</div>
                 <div className="text-muted mt-1">
