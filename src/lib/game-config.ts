@@ -82,7 +82,7 @@ export const PERSONAS: Persona[] = [
 ];
 
 export const ROUNDS_COUNT = 3;
-export const ATTEMPTS_PER_ROUND = 4;
+export const ATTEMPTS_PER_ROUND = 10;
 export const TOTAL_ATTEMPTS = ROUNDS_COUNT * ATTEMPTS_PER_ROUND;
 export const DASHBOARD_CODE = "bandit2026";
 

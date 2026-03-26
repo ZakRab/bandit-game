@@ -28,7 +28,7 @@ export const setRound = mutation({
 const PERSONA_IDS = ["maya", "jordan", "riley", "sam", "alex", "taylor"];
 
 export const joinGame = mutation({
-  args: { visitorId: v.string() },
+  args: { visitorId: v.string(), name: v.string() },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("players")
@@ -46,7 +46,7 @@ export const joinGame = mutation({
     const leastUsed = PERSONA_IDS.filter((id) => counts[id] === minCount);
     const persona = leastUsed[Math.floor(Math.random() * leastUsed.length)];
 
-    await ctx.db.insert("players", { visitorId: args.visitorId, persona });
+    await ctx.db.insert("players", { visitorId: args.visitorId, name: args.name, persona });
     return persona;
   },
 });

@@ -60,13 +60,15 @@ function getBestType(stats: Record<ConnectionType, Stats>): ConnectionType | nul
 function getConfidence(s: Stats): { level: "unknown" | "low" | "medium" | "high"; rate: number } {
   if (s.attempts === 0) return { level: "unknown", rate: 0 };
   const rate = s.successes / s.attempts;
-  if (s.attempts <= 1) return { level: "low", rate };
-  if (s.attempts <= 3) return { level: "medium", rate };
+  if (s.attempts <= 2) return { level: "low", rate };
+  if (s.attempts <= 6) return { level: "medium", rate };
   return { level: "high", rate };
 }
 
 export default function PlayerPage() {
   const [visitorId, setVisitorId] = useState<string>("");
+  const [playerName, setPlayerName] = useState<string>("");
+  const [nameInput, setNameInput] = useState("");
   const [persona, setPersona] = useState<Persona | null>(null);
   const [lastResult, setLastResult] = useState<{ success: boolean; type: ConnectionType } | null>(null);
   const resultTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,30 +98,39 @@ export default function PlayerPage() {
   const bestType = getBestType(allStats);
   const totalSuccesses = choices.filter((c) => c.success).length;
 
-  // Initialize player
+  // Restore session if already joined
   useEffect(() => {
-    let id = sessionStorage.getItem("bandit_player_id");
+    const id = sessionStorage.getItem("bandit_player_id");
+    const name = sessionStorage.getItem("bandit_player_name");
+    const cachedPersona = sessionStorage.getItem("bandit_persona_id");
 
+    if (id && name && cachedPersona) {
+      setVisitorId(id);
+      setPlayerName(name);
+      setPersona(getPersonaById(cachedPersona) || PERSONAS[0]);
+    }
+  }, []);
+
+  const handleJoin = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+
+    let id = sessionStorage.getItem("bandit_player_id");
     if (!id) {
       id = uuidv4();
       sessionStorage.setItem("bandit_player_id", id);
     }
 
     setVisitorId(id);
+    setPlayerName(trimmed);
+    sessionStorage.setItem("bandit_player_name", trimmed);
 
-    // Server assigns persona (balanced across players)
-    const cachedPersona = sessionStorage.getItem("bandit_persona_id");
-    if (cachedPersona) {
-      setPersona(getPersonaById(cachedPersona) || PERSONAS[0]);
+    const assignedPersona = await joinGame({ visitorId: id, name: trimmed });
+    if (assignedPersona) {
+      sessionStorage.setItem("bandit_persona_id", assignedPersona);
+      setPersona(getPersonaById(assignedPersona) || PERSONAS[0]);
     }
-
-    joinGame({ visitorId: id }).then((assignedPersona) => {
-      if (assignedPersona) {
-        sessionStorage.setItem("bandit_persona_id", assignedPersona);
-        setPersona(getPersonaById(assignedPersona) || PERSONAS[0]);
-      }
-    });
-  }, [joinGame]);
+  };
 
   const makeChoice = useCallback(
     async (type: ConnectionType) => {
@@ -143,10 +154,30 @@ export default function PlayerPage() {
     [canPlay, visitorId, persona, currentAttempt, currentRound, recordChoice]
   );
 
-  if (!persona || !visitorId) {
+  if (!persona || !visitorId || !playerName) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted text-lg">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="bg-card border border-card-border rounded-xl p-8 max-w-sm w-full text-center">
+          <div className="text-4xl mb-4">🎰</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Network Builder</h1>
+          <p className="text-muted text-sm mb-6">Enter your name to join the game</p>
+          <input
+            type="text"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+            placeholder="Your name"
+            autoFocus
+            className="w-full px-4 py-3 bg-background border border-card-border rounded-lg text-white placeholder-muted focus:outline-none focus:border-accent text-center text-lg"
+          />
+          <button
+            onClick={handleJoin}
+            disabled={!nameInput.trim()}
+            className="w-full mt-3 px-4 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Join Game
+          </button>
+        </div>
       </div>
     );
   }
@@ -228,7 +259,7 @@ export default function PlayerPage() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-4xl mb-3">
-                  {roundChoices.filter((c) => c.success).length >= 3 ? "🔥" : "👍"}
+                  {roundChoices.filter((c) => c.success).length >= 7 ? "🔥" : "👍"}
                 </div>
                 <div className="text-lg font-semibold text-white">Round {currentRound} complete!</div>
                 <div className="text-muted mt-1">

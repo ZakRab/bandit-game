@@ -95,17 +95,41 @@ export default function DashboardPage() {
     ).length;
   };
 
+  const ROUND_LABELS = ["", "Gut Feeling", "Epsilon-Greedy", "Thompson Sampling"];
+
   const leaderboard = () => {
     const playerIds = [...new Set(allChoices.map((c) => c.visitorId))];
     return playerIds
       .map((pid) => {
         const pc = allChoices.filter((c) => c.visitorId === pid);
-        const successes = pc.filter((c) => c.success).length;
         const player = players.find((p) => p.visitorId === pid);
         const persona = player ? getPersonaById(player.persona) : null;
-        return { pid, persona, successes, total: pc.length };
+        const totalSuccesses = pc.filter((c) => c.success).length;
+
+        // Find best round
+        let bestRound = 0;
+        let bestScore = -1;
+        for (let r = 1; r <= ROUNDS_COUNT; r++) {
+          const rc = pc.filter((c) => c.round === r);
+          const score = rc.filter((c) => c.success).length;
+          if (score > bestScore) {
+            bestScore = score;
+            bestRound = r;
+          }
+        }
+
+        return {
+          pid,
+          name: player?.name || "Unknown",
+          persona,
+          totalSuccesses,
+          total: pc.length,
+          bestScore,
+          bestRound,
+          bestAlgo: ROUND_LABELS[bestRound] || "",
+        };
       })
-      .sort((a, b) => b.successes - a.successes);
+      .sort((a, b) => b.totalSuccesses - a.totalSuccesses);
   };
 
   const startRound = (round: number) => setRound({ currentRound: round, roundActive: true });
@@ -205,6 +229,40 @@ export default function DashboardPage() {
             </>
           )}
         </div>
+      </div>
+
+      {/* Player List */}
+      <div className="bg-card border border-card-border rounded-xl p-6 mb-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
+          Players ({players.length})
+        </h2>
+        {players.length === 0 ? (
+          <div className="text-muted text-sm">No players yet. Waiting for students to join...</div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {players.map((p) => {
+              const persona = getPersonaById(p.persona);
+              const pc = allChoices.filter((c) => c.visitorId === p.visitorId);
+              const successes = pc.filter((c) => c.success).length;
+              return (
+                <div
+                  key={p.visitorId}
+                  className="bg-background rounded-lg px-3 py-2 text-sm"
+                >
+                  <span className="text-white font-medium">{p.name}</span>
+                  <span className="text-muted ml-1.5 text-xs">
+                    {persona?.name}
+                  </span>
+                  {pc.length > 0 && (
+                    <span className="text-accent ml-1.5 text-xs font-mono">
+                      {successes}/{pc.length}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Live Stats */}
@@ -338,21 +396,27 @@ export default function DashboardPage() {
           <div className="bg-card border border-card-border rounded-xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Leaderboard</h3>
             <div className="space-y-2">
-              {leaderboard()
-                .slice(0, 10)
-                .map((entry, i) => (
-                  <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
-                    <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
-                    <div className="flex-1">
-                      <span className="text-white text-sm">
-                        {entry.persona?.name || "Unknown"} ({entry.persona?.major})
-                      </span>
+              {leaderboard().map((entry, i) => (
+                <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
+                  <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm font-medium truncate">{entry.name}</div>
+                    <div className="text-xs text-muted">
+                      {entry.persona?.name} ({entry.persona?.major})
                     </div>
-                    <span className="text-lg font-bold text-accent">
-                      {entry.successes}/{entry.total}
-                    </span>
                   </div>
-                ))}
+                  <div className="text-right shrink-0">
+                    <div className="text-lg font-bold text-accent">
+                      {entry.totalSuccesses}/{entry.total}
+                    </div>
+                    {entry.bestRound > 0 && (
+                      <div className="text-xs text-muted">
+                        Best: {entry.bestScore}/{ATTEMPTS_PER_ROUND} ({entry.bestAlgo})
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
