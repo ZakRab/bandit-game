@@ -20,6 +20,7 @@ const GAME_URL = "https://bandit-game.vercel.app";
 interface Slide {
   type: "content" | "qr" | "game" | "reveal";
   round?: number;
+  presenter: string;
   render: () => React.ReactNode;
 }
 
@@ -27,7 +28,7 @@ function useSlides(): Slide[] {
   return [
     // 0 — Title
     {
-      type: "content",
+      type: "content", presenter: "W",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full text-center">
           <div className="slide-enter text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 leading-tight">
@@ -46,7 +47,7 @@ function useSlides(): Slide[] {
     },
     // 1 — Exploration vs Exploitation
     {
-      type: "content",
+      type: "content", presenter: "W",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full">
           <h1 className="slide-enter text-5xl font-bold text-white mb-4">The Exploration-Exploitation Dilemma</h1>
@@ -72,10 +73,10 @@ function useSlides(): Slide[] {
       ),
     },
     // 2 — QR Code
-    { type: "qr", render: () => null },
+    { type: "qr", presenter: "W", render: () => null },
     // 3 — How Game Works
     {
-      type: "content",
+      type: "content", presenter: "L",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-12">How the Game Works</h1>
@@ -100,7 +101,7 @@ function useSlides(): Slide[] {
     },
     // 4 — Connection Types
     {
-      type: "content",
+      type: "content", presenter: "L",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full">
           <h1 className="slide-enter text-5xl font-bold text-white mb-12">The 4 Connection Types</h1>
@@ -129,7 +130,7 @@ function useSlides(): Slide[] {
     },
     // 5 — Round 1
     {
-      type: "game", round: 1,
+      type: "game", presenter: "Z", round: 1,
       render: () => (
         <div className="text-center mb-6">
           <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 1 — Play Now</h1>
@@ -140,7 +141,7 @@ function useSlides(): Slide[] {
     },
     // 6 — Epsilon-Greedy Intro
     {
-      type: "content",
+      type: "content", presenter: "T",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Strategy 1: Epsilon-Greedy</h1>
@@ -169,7 +170,7 @@ function useSlides(): Slide[] {
     },
     // 7 — Epsilon-Greedy Example
     {
-      type: "content",
+      type: "content", presenter: "T",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Epsilon-Greedy: Example</h1>
@@ -194,7 +195,7 @@ function useSlides(): Slide[] {
     },
     // 8 — Epsilon-Greedy Code
     {
-      type: "content",
+      type: "content", presenter: "T",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Epsilon-Greedy: The Code</h1>
@@ -225,7 +226,7 @@ update_stats(choice, outcome)`}</pre>
     },
     // 9 — Round 2
     {
-      type: "game", round: 2,
+      type: "game", presenter: "Z", round: 2,
       render: () => (
         <div className="text-center mb-6">
           <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 2 — Play Now</h1>
@@ -236,7 +237,7 @@ update_stats(choice, outcome)`}</pre>
     },
     // 10 — Problem with Epsilon-Greedy
     {
-      type: "content",
+      type: "content", presenter: "K",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-4">The Problem with Epsilon-Greedy</h1>
@@ -263,7 +264,7 @@ update_stats(choice, outcome)`}</pre>
     },
     // 11 — Thompson Sampling with Beta distribution graphs
     {
-      type: "content",
+      type: "content", presenter: "K",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-5xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-3">Thompson Sampling</h1>
@@ -336,7 +337,7 @@ update_stats(choice, outcome)`}</pre>
     },
     // 12 — Thompson Code
     {
-      type: "content",
+      type: "content", presenter: "K",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Thompson Sampling: The Code</h1>
@@ -363,7 +364,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 13 — Round 3
     {
-      type: "game", round: 3,
+      type: "game", presenter: "Z", round: 3,
       render: () => (
         <div className="text-center mb-6">
           <h1 className="slide-enter text-5xl font-bold text-white mb-3">Round 3 — Play Now</h1>
@@ -373,10 +374,10 @@ choice = argmax(θ)    # Pick highest`}</pre>
       ),
     },
     // 14 — Reveal
-    { type: "reveal", render: () => null },
+    { type: "reveal", presenter: "W", render: () => null },
     // 15 — Key Insight
     {
-      type: "content",
+      type: "content", presenter: "W",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-12">The Key Insight</h1>
@@ -409,7 +410,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 16 — Regret
     {
-      type: "content",
+      type: "content", presenter: "W",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-4">Regret Analysis</h1>
@@ -441,7 +442,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 17 — Real-World Applications
     {
-      type: "content",
+      type: "content", presenter: "L",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-12">Real-World Applications</h1>
@@ -468,7 +469,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 18 — Why This Matters
     {
-      type: "content",
+      type: "content", presenter: "L",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Why This Matters</h1>
@@ -497,7 +498,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
     },
     // 19 — Questions
     {
-      type: "content",
+      type: "content", presenter: "A",
       render: () => (
         <div className="flex flex-col items-center justify-center h-full text-center">
           <h1 className="slide-enter text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-12">Questions?</h1>
@@ -721,6 +722,11 @@ export default function PresentPage() {
             <RevealDashboard />
           </div>
         )}
+      </div>
+
+      {/* Presenter hint — bottom right, barely visible */}
+      <div className="absolute bottom-4 right-6 text-[10px] font-mono text-slate-700/40 select-none pointer-events-none">
+        {slide.presenter}
       </div>
 
       {/* Minimal floating nav */}
