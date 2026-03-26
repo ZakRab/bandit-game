@@ -64,7 +64,7 @@ function useSlides(): Slide[] {
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
                 </div>
                 <div className={`text-xl font-bold bg-gradient-to-r ${item.color} text-transparent bg-clip-text mb-2`}>{item.title}</div>
-                <div className="text-sm text-slate-400">{item.desc}</div>
+                <div className="text-base text-slate-400">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -117,7 +117,7 @@ function useSlides(): Slide[] {
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={t.icon} /></svg>
                 </div>
                 <div className={`text-sm font-bold tracking-wider bg-gradient-to-r ${t.gradient} text-transparent bg-clip-text mb-2`}>{t.name}</div>
-                <div className="text-xs text-slate-400">{t.desc}</div>
+                <div className="text-sm text-slate-400">{t.desc}</div>
               </div>
             ))}
           </div>
@@ -148,16 +148,16 @@ function useSlides(): Slide[] {
             <div className="slide-enter-delay-1 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-2xl p-8 text-center slide-glow">
               <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-emerald-500 mb-2">80%</div>
               <div className="text-lg text-white font-semibold">EXPLOIT</div>
-              <div className="text-sm text-slate-400 mt-1">best option so far</div>
+              <div className="text-base text-slate-400 mt-1">best option so far</div>
             </div>
             <div className="slide-enter-delay-2 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 rounded-2xl p-8 text-center">
               <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-400 to-amber-500 mb-2">20%</div>
               <div className="text-lg text-white font-semibold">EXPLORE</div>
-              <div className="text-sm text-slate-400 mt-1">randomly</div>
+              <div className="text-base text-slate-400 mt-1">randomly</div>
             </div>
           </div>
           <div className="slide-enter-delay-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full max-w-2xl">
-            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-3 uppercase">Why it works</div>
+            <div className="text-sm text-slate-500 font-semibold tracking-wider mb-3 uppercase">Why it works</div>
             <div className="space-y-2 text-slate-300">
               {["Mostly exploits what works", "Keeps exploring for better options", "Guaranteed not to get stuck on a bad choice"].map((t, i) => (
                 <div key={i} className="flex items-center gap-3"><svg className="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t}</div>
@@ -174,7 +174,7 @@ function useSlides(): Slide[] {
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Epsilon-Greedy: Example</h1>
           <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full mb-6">
-            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-3 uppercase">Your Round 1 Results</div>
+            <div className="text-sm text-slate-500 font-semibold tracking-wider mb-3 uppercase">Your Round 1 Results</div>
             <table className="w-full text-sm"><thead><tr className="text-slate-500 text-xs uppercase tracking-wider"><th className="text-left py-2">Type</th><th className="text-center">Tries</th><th className="text-center">Success</th><th className="text-center">Rate</th></tr></thead>
               <tbody className="text-slate-300">
                 <tr className="border-t border-slate-700/50"><td className="py-2">Your Major</td><td className="text-center">2</td><td className="text-center">1</td><td className="text-center">50%</td></tr>
@@ -216,7 +216,7 @@ update_stats(choice, outcome)`}</pre>
             ].map((b) => (
               <div key={b.label} className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-6 py-3 text-center">
                 <div className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${b.color}`}>{b.label}</div>
-                <div className="text-xs text-slate-500">{b.sub}</div>
+                <div className="text-sm text-slate-500">{b.sub}</div>
               </div>
             ))}
           </div>
@@ -245,12 +245,12 @@ update_stats(choice, outcome)`}</pre>
             <div className="slide-enter-delay-2 bg-slate-800/50 border border-green-500/20 rounded-2xl p-8 text-center">
               <div className="text-lg text-slate-300 mb-3">Alumni: 5 tries → 1 success (20%)</div>
               <div className="inline-flex px-4 py-1.5 rounded-full bg-green-500/20 text-green-400 font-bold text-lg mb-2">HIGH CONFIDENCE</div>
-              <div className="text-sm text-slate-400">You know it&apos;s probably bad</div>
+              <div className="text-base text-slate-400">You know it&apos;s probably bad</div>
             </div>
             <div className="slide-enter-delay-3 bg-slate-800/50 border border-yellow-500/20 rounded-2xl p-8 text-center">
               <div className="text-lg text-slate-300 mb-3">Different: 1 try → 1 success (100%)</div>
               <div className="inline-flex px-4 py-1.5 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-lg mb-2">HIGH UNCERTAINTY</div>
-              <div className="text-sm text-slate-400">Could be great, could be luck!</div>
+              <div className="text-base text-slate-400">Could be great, could be luck!</div>
             </div>
           </div>
           <div className="slide-enter-delay-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-6 text-center w-full slide-glow">
@@ -261,22 +261,75 @@ update_stats(choice, outcome)`}</pre>
         </div>
       ),
     },
-    // 11 — Thompson Sampling
+    // 11 — Thompson Sampling with Beta distribution graphs
     {
       type: "content",
       render: () => (
-        <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
-          <h1 className="slide-enter text-5xl font-bold text-white mb-10">Thompson Sampling</h1>
-          <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 w-full mb-6">
-            <p className="text-lg text-slate-300 mb-6">Model each option as <span className="font-mono text-purple-400">Beta(successes + 1, failures + 1)</span></p>
-            <div className="space-y-5">
-              <div><div className="text-sm text-slate-400 mb-1.5">Alumni: 5 tries, 1 success → Beta(2, 5)</div><div className="h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: "90%" }} /></div><div className="text-xs text-green-400 mt-1">Narrow — confident it&apos;s ~20%</div></div>
-              <div><div className="text-sm text-slate-400 mb-1.5">Different: 1 try, 1 success → Beta(2, 1)</div><div className="h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full" style={{ width: "35%" }} /></div><div className="text-xs text-yellow-400 mt-1">Wide — could be anywhere from 10% to 90%!</div></div>
+        <div className="flex flex-col items-center justify-center h-full max-w-5xl mx-auto">
+          <h1 className="slide-enter text-5xl font-bold text-white mb-3">Thompson Sampling</h1>
+          <p className="slide-enter-delay-1 text-xl font-mono text-purple-400 mb-8">Model each option as Beta(successes + 1, failures + 1)</p>
+          {/* Beta distribution graphs */}
+          <div className="slide-enter-delay-2 grid grid-cols-2 gap-6 w-full mb-8">
+            {/* Alumni — Beta(2,5) — narrow peak at ~0.2 */}
+            <div className="bg-slate-800/60 border border-green-500/20 rounded-2xl p-5">
+              <div className="text-center mb-3">
+                <span className="text-lg font-bold text-green-400">Alumni</span>
+                <span className="text-base text-slate-400 ml-2">5 tries, 1 success</span>
+              </div>
+              <svg viewBox="0 0 200 110" className="w-full h-auto">
+                {/* Axes */}
+                <line x1="30" y1="85" x2="190" y2="85" stroke="#475569" strokeWidth="1" />
+                <line x1="30" y1="85" x2="30" y2="10" stroke="#475569" strokeWidth="1" />
+                {/* X-axis labels */}
+                <text x="30" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.0</text>
+                <text x="70" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.2</text>
+                <text x="110" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.4</text>
+                <text x="150" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.6</text>
+                <text x="190" y="100" fill="#64748b" fontSize="8" textAnchor="middle">1.0</text>
+                <text x="110" y="110" fill="#64748b" fontSize="8" textAnchor="middle">Success Probability</text>
+                {/* Y-axis label */}
+                <text x="12" y="50" fill="#64748b" fontSize="7" textAnchor="middle" transform="rotate(-90, 12, 50)">Likelihood</text>
+                {/* Beta(2,5) curve — narrow peak near 0.2 */}
+                <defs><linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity="0.6" /><stop offset="100%" stopColor="#22c55e" stopOpacity="0.05" /></linearGradient></defs>
+                <path d="M 30 85 C 35 85, 45 80, 55 50 C 60 30, 65 18, 70 15 C 75 18, 80 30, 90 55 C 105 75, 130 83, 160 84.5 L 190 85 Z" fill="url(#greenGrad)" />
+                <path d="M 30 85 C 35 85, 45 80, 55 50 C 60 30, 65 18, 70 15 C 75 18, 80 30, 90 55 C 105 75, 130 83, 160 84.5 L 190 85" fill="none" stroke="#22c55e" strokeWidth="2.5" />
+                {/* Peak annotation */}
+                <line x1="70" y1="15" x2="70" y2="85" stroke="#22c55e" strokeWidth="1" strokeDasharray="3,3" opacity="0.5" />
+                <rect x="48" y="28" width="52" height="22" rx="4" fill="#0f172a" fillOpacity="0.85" stroke="#22c55e" strokeWidth="0.5" />
+                <text x="74" y="37" fill="#22c55e" fontSize="8" textAnchor="middle" fontWeight="bold">~20%</text>
+                <text x="74" y="46" fill="#86efac" fontSize="7" textAnchor="middle">High confidence</text>
+              </svg>
+            </div>
+            {/* Different — Beta(2,1) — wide, rising slope */}
+            <div className="bg-slate-800/60 border border-amber-500/20 rounded-2xl p-5">
+              <div className="text-center mb-3">
+                <span className="text-lg font-bold text-amber-400">Different Colleges</span>
+                <span className="text-base text-slate-400 ml-2">1 try, 1 success</span>
+              </div>
+              <svg viewBox="0 0 200 110" className="w-full h-auto">
+                <line x1="30" y1="85" x2="190" y2="85" stroke="#475569" strokeWidth="1" />
+                <line x1="30" y1="85" x2="30" y2="10" stroke="#475569" strokeWidth="1" />
+                <text x="30" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.0</text>
+                <text x="70" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.2</text>
+                <text x="110" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.4</text>
+                <text x="150" y="100" fill="#64748b" fontSize="8" textAnchor="middle">0.6</text>
+                <text x="190" y="100" fill="#64748b" fontSize="8" textAnchor="middle">1.0</text>
+                <text x="110" y="110" fill="#64748b" fontSize="8" textAnchor="middle">Success Probability</text>
+                <text x="12" y="50" fill="#64748b" fontSize="7" textAnchor="middle" transform="rotate(-90, 12, 50)">Likelihood</text>
+                {/* Beta(2,1) curve — wide rising slope */}
+                <defs><linearGradient id="amberGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f59e0b" stopOpacity="0.5" /><stop offset="100%" stopColor="#f59e0b" stopOpacity="0.05" /></linearGradient></defs>
+                <path d="M 30 85 L 190 15 L 190 85 Z" fill="url(#amberGrad)" />
+                <path d="M 30 85 L 190 15" fill="none" stroke="#f59e0b" strokeWidth="2.5" />
+                {/* Wide annotation */}
+                <rect x="95" y="42" width="65" height="22" rx="4" fill="#0f172a" fillOpacity="0.85" stroke="#f59e0b" strokeWidth="0.5" />
+                <text x="127" y="51" fill="#f59e0b" fontSize="8" textAnchor="middle" fontWeight="bold">Could be anywhere!</text>
+                <text x="127" y="60" fill="#fcd34d" fontSize="7" textAnchor="middle">High uncertainty</text>
+              </svg>
             </div>
           </div>
-          <div className="slide-enter-delay-2 bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6 w-full text-center">
+          <div className="slide-enter-delay-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl p-5 w-full text-center slide-glow">
             <p className="text-sm text-purple-300/60 uppercase tracking-wider mb-2 font-semibold">The Algorithm</p>
-            <p className="text-xl text-white">Sample from each distribution → Pick the highest sample</p>
+            <p className="text-2xl text-white font-semibold">Sample from each distribution → Pick the highest sample</p>
           </div>
         </div>
       ),
@@ -301,7 +354,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
             ].map((b) => (
               <div key={b.label} className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-5 py-3 text-center">
                 <div className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${b.color}`}>{b.label}</div>
-                <div className="text-xs text-slate-500">{b.sub}</div>
+                <div className="text-sm text-slate-500">{b.sub}</div>
               </div>
             ))}
           </div>
@@ -343,7 +396,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
                 </div>
                 <div>
                   <div className={`text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r ${item.color}`}>{item.title}</div>
-                  <div className="text-sm text-slate-400">{item.desc}</div>
+                  <div className="text-base text-slate-400">{item.desc}</div>
                 </div>
               </div>
             ))}
@@ -370,13 +423,13 @@ choice = argmax(θ)    # Pick highest`}</pre>
               <div key={c.title} className={`${c.delay} bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 text-center`}>
                 <div className={`text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r ${c.color} mb-2`}>{c.title}</div>
                 <div className="text-3xl font-mono font-bold text-white mb-1">{c.big}</div>
-                <div className="text-sm text-slate-400">{c.desc}</div>
+                <div className="text-base text-slate-400">{c.desc}</div>
               </div>
             ))}
           </div>
           <div className="slide-enter-delay-5 relative h-36 w-full max-w-2xl border-l-2 border-b-2 border-slate-700 ml-6">
-            <div className="absolute -left-14 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-slate-500 whitespace-nowrap">Cumulative Regret</div>
-            <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-xs text-slate-500">Attempts</div>
+            <div className="absolute -left-14 top-1/2 -translate-y-1/2 -rotate-90 text-sm text-slate-500 whitespace-nowrap">Cumulative Regret</div>
+            <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-sm text-slate-500">Attempts</div>
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <path d="M 0 100 L 100 10" stroke="#EF4444" strokeWidth="2.5" fill="none" vectorEffect="non-scaling-stroke" />
               <path d="M 0 100 Q 50 50 100 30" stroke="#3B82F6" strokeWidth="2.5" fill="none" vectorEffect="non-scaling-stroke" />
@@ -406,7 +459,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
                 </div>
                 <div className="text-white font-semibold mb-1">{item.title}</div>
-                <div className="text-xs text-slate-400">{item.desc}</div>
+                <div className="text-sm text-slate-400">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -420,7 +473,7 @@ choice = argmax(θ)    # Pick highest`}</pre>
         <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto">
           <h1 className="slide-enter text-5xl font-bold text-white mb-10">Why This Matters</h1>
           <div className="slide-enter-delay-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 w-full mb-8">
-            <div className="text-xs text-slate-500 font-semibold tracking-wider mb-4 uppercase">Real-world optimization has:</div>
+            <div className="text-sm text-slate-500 font-semibold tracking-wider mb-4 uppercase">Real-world optimization has:</div>
             <div className="space-y-3">
               {["Unknown parameters — you don't know rates upfront", "Limited resources — can't try everything infinitely", "Changing conditions — preferences drift over time", "Cost of exploration — every failed attempt has a cost"].map((t, i) => (
                 <div key={i} className="flex items-center gap-3 text-slate-300">
@@ -432,11 +485,11 @@ choice = argmax(θ)    # Pick highest`}</pre>
           <div className="slide-enter-delay-2 grid grid-cols-2 gap-4 w-full">
             <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-5 text-center">
               <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-1">MAB FRAMEWORK</div>
-              <div className="text-sm text-slate-400">A principled way to balance learning vs. earning</div>
+              <div className="text-base text-slate-400">A principled way to balance learning vs. earning</div>
             </div>
             <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-5 text-center slide-glow">
               <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">THOMPSON SAMPLING</div>
-              <div className="text-sm text-slate-400">O(log T) regret — Provably near-optimal</div>
+              <div className="text-base text-slate-400">O(log T) regret — Provably near-optimal</div>
             </div>
           </div>
         </div>
@@ -493,23 +546,23 @@ function GameDashboard({ round }: { round: number }) {
   return (
     <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
       <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-        <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-3">Choice Distribution</h3>
+        <h3 className="text-sm text-slate-500 uppercase tracking-wider mb-3">Choice Distribution</h3>
         <div className="space-y-2.5">
           {dist().map((item) => (
             <div key={item.id}>
-              <div className="flex justify-between mb-0.5"><span className="text-xs text-slate-300">{item.emoji} {item.label}</span><span className="text-xs text-slate-500">{item.count} ({item.pct}%)</span></div>
+              <div className="flex justify-between mb-0.5"><span className="text-xs text-slate-300">{item.emoji} {item.label}</span><span className="text-sm text-slate-500">{item.count} ({item.pct}%)</span></div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }} /></div>
             </div>
           ))}
         </div>
         <div className="mt-5 pt-4 border-t border-slate-700/50">
-          <div className="text-xs text-slate-500">Class Average</div>
+          <div className="text-sm text-slate-500">Class Average</div>
           <div className="text-3xl font-bold text-white">{avg().toFixed(1)} <span className="text-sm text-slate-500">/ {ATTEMPTS_PER_ROUND}</span></div>
-          <div className="text-xs text-slate-500 mt-1">{done()} / {players.length} completed</div>
+          <div className="text-sm text-slate-500 mt-1">{done()} / {players.length} completed</div>
         </div>
       </div>
       <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 col-span-2 overflow-y-auto">
-        <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-3">Round {round}: {ROUND_LABELS[round]}</h3>
+        <h3 className="text-sm text-slate-500 uppercase tracking-wider mb-3">Round {round}: {ROUND_LABELS[round]}</h3>
         <div className="space-y-1.5">
           {lb().map((e, i) => (
             <div key={e.p} className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2">
@@ -548,9 +601,9 @@ function RevealDashboard() {
       <div className="slide-enter grid grid-cols-3 gap-4 text-center">
         {[1, 2, 3].map((r) => (
           <div key={r} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">{ROUND_LABELS[r]}</div>
+            <div className="text-sm text-slate-500 mb-1">{ROUND_LABELS[r]}</div>
             <div className="text-4xl font-bold text-white">{roundAvg(r).toFixed(1)}</div>
-            <div className="text-xs text-slate-500">/ {ATTEMPTS_PER_ROUND}</div>
+            <div className="text-sm text-slate-500">/ {ATTEMPTS_PER_ROUND}</div>
           </div>
         ))}
       </div>
@@ -563,7 +616,7 @@ function RevealDashboard() {
       <div className="slide-enter-delay-2 grid grid-cols-3 gap-4">
         {[1, 2, 3].map((r) => (
           <div key={r} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-2 uppercase tracking-wider">{ROUND_LABELS[r]}</div>
+            <div className="text-sm text-slate-500 mb-2 uppercase tracking-wider">{ROUND_LABELS[r]}</div>
             <div className="space-y-1">{lb(r).slice(0, 8).map((e, i) => (<div key={e.p} className="flex items-center gap-1.5 text-xs"><span className={`w-4 ${i === 0 ? "text-yellow-400 font-bold" : "text-slate-600"}`}>#{i + 1}</span><span className="text-white truncate flex-1">{e.name}</span><span className="text-accent font-bold">{e.s}/{ATTEMPTS_PER_ROUND}</span></div>))}</div>
           </div>
         ))}
@@ -673,7 +726,7 @@ export default function PresentPage() {
       {/* Minimal floating nav */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-full px-4 py-2">
         <button onClick={() => setSi((i) => Math.max(i - 1, 0))} disabled={si === 0} className="text-slate-400 hover:text-white disabled:opacity-20 transition px-1">←</button>
-        <span className="text-xs text-slate-500 w-12 text-center">{si + 1}/{slides.length}</span>
+        <span className="text-sm text-slate-500 w-12 text-center">{si + 1}/{slides.length}</span>
         <button onClick={() => setSi((i) => Math.min(i + 1, slides.length - 1))} disabled={si === slides.length - 1} className="text-slate-400 hover:text-white disabled:opacity-20 transition px-1">→</button>
       </div>
     </div>
