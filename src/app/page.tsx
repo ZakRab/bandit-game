@@ -57,12 +57,14 @@ function getBestType(stats: Record<ConnectionType, Stats>): ConnectionType | nul
   return best;
 }
 
-function getConfidence(s: Stats): { level: "unknown" | "low" | "medium" | "high"; rate: number } {
-  if (s.attempts === 0) return { level: "unknown", rate: 0 };
+function getConfidence(s: Stats): { level: "unknown" | "low" | "medium" | "high"; rate: number; fillPct: number } {
+  if (s.attempts === 0) return { level: "unknown", rate: 0, fillPct: 5 };
   const rate = s.successes / s.attempts;
-  if (s.attempts <= 2) return { level: "low", rate };
-  if (s.attempts <= 6) return { level: "medium", rate };
-  return { level: "high", rate };
+  // Bar width = how much data you have (confidence), not the success rate
+  const fillPct = Math.min(100, (s.attempts / 10) * 100);
+  if (s.attempts <= 2) return { level: "low", rate, fillPct };
+  if (s.attempts <= 6) return { level: "medium", rate, fillPct };
+  return { level: "high", rate, fillPct };
 }
 
 export default function PlayerPage() {
@@ -313,16 +315,16 @@ export default function PlayerPage() {
                                   : "bg-fail"
                             }`}
                             style={{
-                              width: confidence.level === "unknown" ? "100%" : `${confidence.rate * 100}%`,
+                              width: `${confidence.fillPct}%`,
                               opacity: confidence.level === "unknown" ? 0.3 : 1,
                             }}
                           />
                         </div>
                         <div className="text-[10px] text-muted mt-0.5 text-center">
                           {confidence.level === "unknown"
-                            ? "Unknown"
+                            ? "No data — explore!"
                             : confidence.level === "low"
-                              ? "Uncertain"
+                              ? "Uncertain — worth trying"
                               : confidence.level === "medium"
                                 ? "Some data"
                                 : "Confident"}

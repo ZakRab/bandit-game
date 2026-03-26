@@ -248,6 +248,32 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {/* Round Leaderboard */}
+      {currentRound >= 1 && !isReveal && (
+        <div className="bg-card border border-card-border rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Round {currentRound} Leaderboard — {ROUND_LABELS[currentRound]}
+          </h3>
+          {leaderboard(currentRound).length === 0 ? (
+            <div className="text-muted text-sm">Waiting for results...</div>
+          ) : (
+            <div className="space-y-2">
+              {leaderboard(currentRound).map((entry, i) => (
+                <div key={entry.pid} className="flex items-center gap-3 bg-background rounded-lg p-3">
+                  <span className="text-lg font-bold text-muted w-8">#{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-white text-sm font-medium truncate">{entry.name}</span>
+                  </div>
+                  <span className="text-lg font-bold text-accent shrink-0">
+                    {entry.successes}/{ATTEMPTS_PER_ROUND}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Live Stats */}
       {currentRound >= 1 && !isReveal && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
